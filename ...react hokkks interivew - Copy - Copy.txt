@@ -1,0 +1,278 @@
+...react hokkks
+. Write a component that toggles between two states using a button.
+Answer: We can write a React component that toggles between two states using a button with this code:
+
+import React, { useState } from 'react';
+
+const ToggleComponent = () => {
+    const [isOn, setIsOn] = useState(false);
+
+    return (
+        <div>
+            <h2>{isOn ? 'On' : 'Off'}</h2>
+            <button onClick={() => setIsOn(!isOn)}>Toggle</button>
+        </div>
+    );
+};
+
+export default ToggleComponent;
+Q1. Write a simple React component that displays “Hello, World!” on the screen.
+Answer: To display “Hello, World” with the help of a React component, we can use the given React code:
+
+import React from 'react';
+
+const HelloWorld = () => {
+    return <h1>Hello, World!</h1>;
+};
+
+export default HelloWorld;
+
+Find and Apply Banner
+Q2. Create a functional component that takes a name prop and displays a greeting message.
+Answer: To create a functional component that accepts a name prop and displays a greeting message, we can use the following code:
+
+import React from 'react';
+
+const Greeting = ({ name }) => {
+    return <h2>Hello, {name}!</h2>;
+};
+
+export default Greeting;
+Q3. Write a React component that maintains a count state and has buttons to increment and decrement the count.
+Answer:This React component maintains a count state and provides buttons for incrementing and decrementing that count:
+
+import React, { useState } from 'react';
+
+const Counter = () => {
+    const [count, setCount] = useState(0);
+    return (
+        <div>
+            <h2>Count: {count}</h2>
+            <button onClick={() => setCount(count + 1)}>Increment</button>
+            <button onClick={() => setCount(count - 1)}>Decrement</button>
+        </div>
+    );
+};
+
+export default Counter;
+Q4. How do you create a controlled component for an input field?
+Answer: Here’s how we can implement a controlled component for an input field in React:
+
+import React, { useState } from 'react';
+
+const ControlledInput = () => {
+    const [value, setValue] = useState('');
+
+    const handleChange = (event) => {
+        setValue(event.target.value);
+    };
+
+    return <input type="text" value={value} onChange={handleChange} />;
+};
+
+export default ControlledInput;
+Also Read: Back-End Developer Interview Questions
+
+Q5. Write a simple component that fetches data from an API and displays it.
+Answer: This code shows a simple React component that fetches data from an API and displays the results:
+
+import React, { useEffect, useState } from 'react';
+
+const DataFetchingComponent = () => {
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        fetch('https://api.example.com/data')
+            .then(response => response.json())
+            .then(data => setData(data));
+    }, []);
+
+    return (
+        <ul>
+            {data.map(item => (
+                <li key={item.id}>{item.name}</li>
+            ))}
+        </ul>
+    );
+};
+
+export default DataFetchingComponent;
+Pro Tip: Working on some beginner-friendly react projects can help you understand the basic concepts required to answer such react JS coding interview questions.
+
+Q6. How can you pass data from a parent component to a child component?
+Answer: To pass data from a parent component to a child component in React, we can use the following structure:
+
+import React from 'react';
+
+const ChildComponent = ({ message }) => {
+    return <h3>{message}</h3>;
+};
+
+const ParentComponent = () => {
+    const message = "Hello from Parent";
+
+    return <ChildComponent message={message} />;
+};
+ Write a component that displays a list of items and highlights the selected item.
+Answer: This component displays a list of items and highlights the selected item based on user interaction:
+
+import React, { useState } from 'react';
+
+const HighlightList = () => {
+    const items = ['Item 1', 'Item 2', 'Item 3'];
+    const [selectedIndex, setSelectedIndex] = useState(null);
+
+    return (
+        <ul>
+            {items.map((item, index) => (
+                <li 
+                    key={index} 
+                    onClick={() => setSelectedIndex(index)} 
+                    style={{ backgroundColor: selectedIndex === index ? 'yellow' : 'white' }}
+                >
+                    {item}
+                </li>
+            ))}
+        </ul>
+    );
+};
+
+export default HighlightList;
+
+lets suppose i have to perdofm = +, - * ,% which hook i will use in this
+ChatGPT said:
+If you want to perform arithmetic operations (+, -, *, %) and dynamically update the result based on user input, you should use the useState hook.
+
+If you need to optimize performance (e.g., preventing unnecessary recalculations), you might also use useMemo.
+
+✅ Best Approach: Using useState
+tsx
+Copy
+Edit
+"use client";
+import { useState } from "react";
+
+export default function Calculator() {
+  const [num1, setNum1] = useState(0);
+  const [num2, setNum2] = useState(0);
+  const [operation, setOperation] = useState("+");
+  const [result, setResult] = useState(0);
+
+  const calculateResult = () => {
+    switch (operation) {
+      case "+": setResult(num1 + num2); break;
+      case "-": setResult(num1 - num2); break;
+      case "*": setResult(num1 * num2); break;
+      case "%": setResult(num1 % num2); break;
+      default: setResult(0);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Simple Calculator</h2>
+      <input type="number" value={num1} onChange={e => setNum1(Number(e.target.value))} />
+      <select onChange={e => setOperation(e.target.value)} value={operation}>
+        <option value="+">+</option>
+        <option value="-">-</option>
+        <option value="*">*</option>
+        <option value="%">%</option>
+      </select>
+      <input type="number" value={num2} onChange={e => setNum2(Number(e.target.value))} />
+      <button onClick={calculateResult}>=</button>
+      <h3>Result: {result}</h3>
+    </div>
+  );
+}
+🔹 Explanation
+useState for num1, num2, operation, and result → Tracks values dynamically.
+calculateResult function → Updates the result based on the selected operation.
+Dropdown (<select>) → Lets users choose between +, -, *, and %.
+Button (=) → Triggers calculation.
+✅ Optimized Approach: Using useMemo
+If you want to optimize calculations so they only recompute when num1, num2, or operation change, use useMemo:
+
+tsx
+Copy
+Edit
+import { useState, useMemo } from "react";
+
+export default function Calculator() {
+  const [num1, setNum1] = useState(0);
+  const [num2, setNum2] = useState(0);
+  const [operation, setOperation] = useState("+");
+
+  const result = useMemo(() => {
+    switch (operation) {
+      case "+": return num1 + num2;
+      case "-": return num1 - num2;
+      case "*": return num1 * num2;
+      case "%": return num1 % num2;
+      default: return 0;
+    }
+  }, [num1, num2, operation]);
+
+  return (
+    <div>
+      <h2>Calculator</h2>
+      <input type="number" value={num1} onChange={e => setNum1(Number(e.target.value))} />
+      <select onChange={e => setOperation(e.target.value)} value={operation}>
+        <option value="+">+</option>
+        <option value="-">-</option>
+        <option value="*">*</option>
+        <option value="%">%</option>
+      </select>
+      <input type="number" value={num2} onChange={e => setNum2(Number(e.target.value))} />
+      <h3>Result: {result}</h3>
+    </div>
+  );
+}
+🔹 Why Use useMemo?
+It prevents unnecessary recalculations by only recomputing when num1, num2, or operation change.
+More efficient for large calculations.
+Would you like to extend this with more operations like / (division) or a history feature? 
+
+
+'use client'
+import { useState } from "react";
+
+// Define initial items separately
+const initialItems = [
+  { id: 1, name: "Laptop", price: 1000, quantity: 2 },
+  { id: 2, name: "Mouse", price: 50, quantity: 5 },
+  { id: 3, name: "Keyboard", price: 80, quantity: 3 }
+];
+
+export default function App() {
+  // State to manage items
+  const [items, setItems] = useState(initialItems);
+
+  // Function to update quantity
+  const updateQuantity = (id, newQuantity) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: newQuantity } : item
+      )
+    );
+  };
+
+  // Function to delete an item
+  const deleteItem = (id) => {
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  };
+
+  return (
+    <div>
+      <ul>
+        {items.map((e) => (
+          <li key={e.id}>
+            {e.name} - ${e.price} (Qty: {e.quantity}){" "}
+            <button onClick={() => updateQuantity(e.id, e.quantity + 1)}>➕</button>
+            <button onClick={() => updateQuantity(e.id, e.quantity - 1)}>➖</button>
+            <button onClick={() => deleteItem(e.id)}>❌</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

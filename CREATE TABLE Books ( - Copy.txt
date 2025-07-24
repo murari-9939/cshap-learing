@@ -1,0 +1,32 @@
+CREATE TABLE Books (
+    book_id INT PRIMARY KEY IDENTITY(1,1),
+    book_title VARCHAR(255),
+    author_id INT,
+    FOREIGN KEY (author_id) REFERENCES Authors(author_id)
+);
+
+
+CREATE PROCEDURE InsertBookAndAuthor
+    @book_title VARCHAR(255),
+    @author_name VARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check if the author exists, and get the author_id
+    DECLARE @author_id INT;
+    SELECT @author_id = author_id
+    FROM Authors
+    WHERE author_name = @author_name;
+
+    -- If the author doesn't exist, insert a new author
+    IF @author_id IS NULL
+    BEGIN
+        INSERT INTO Authors (author_name) VALUES (@author_name);
+        SET @author_id = SCOPE_IDENTITY();
+    END;
+
+    -- Insert the book with the obtained or newly generated author_id
+    INSERT INTO Books (book_title, author_id) VALUES (@book_title, @author_id);
+END;
+EXEC InsertBookAndAuthor 'The Adventure Begins' ,'rajesh';

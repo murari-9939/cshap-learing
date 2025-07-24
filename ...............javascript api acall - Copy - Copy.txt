@@ -1,0 +1,104 @@
+...............javascript api acall
+
+<script>
+function getdata() {
+    fetch('https://dummyapi.online/api/movies')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data); // Handle the data here
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+}
+</script>
+...........................with promises s  
+
+<script>
+  function getdata() {
+    // Return a new Promise
+    return new Promise((resolve, reject) => {
+      // Use the fetch API to get the data
+      fetch('https://dummyapi.online/api/movies')
+        .then(response => {
+          // Check if the response is OK (status code 200-299)
+          if (!response.ok) {
+            reject('Network response was not ok'); // Reject if response is bad
+          }
+          // Parse the response body as JSON and resolve the promise with data
+          return response.json();
+        })
+        .then(data => {
+          resolve(data); // Resolve the Promise with the fetched data
+        })
+        .catch(error => {
+          reject(error); // Reject the Promise if there was an error
+        });
+    });
+  }
+
+  // Function to handle the fetch and promises
+  function handleMovies() {
+    // Call the getdata function that returns a promise
+    getdata()
+      .then(data => {
+        // Handle the resolved promise data
+        console.log('Fetched Data:', data);
+
+        // Display data in the DOM (e.g., movie titles in a list)
+        const movieList = document.getElementById('movies');
+        movieList.innerHTML = ''; // Clear previous content
+        data.forEach(movie => {
+          const listItem = document.createElement('li');
+          listItem.textContent = movie.title;
+          movieList.appendChild(listItem);
+        });
+      })
+      .catch(error => {
+        // Handle any errors that occurred
+        console.error('Error:', error);
+
+        // Display error message in the DOM
+        const movieList = document.getElementById('movies');
+        movieList.innerHTML = `<li>Error: ${error}</li>`;
+      });
+  }
+</script>
+
+<!-- Button to trigger fetching movies -->
+<button onclick="handleMovies()">Fetch Movies</button>
+
+<!-- Area to display the movies or error messages -->
+<ul id="movies"></ul>
+
+
+
+.....................timer in javascript
+
+
+ <div>
+        <h1 id="countdown">10</h1>
+        <button onclick="startTimer()">Start Timer</button>
+    </div>
+
+    <script>
+        function startTimer() {
+            let timeLeft = 10; // Countdown starting time in seconds
+            const countdownElement = document.getElementById('countdown');
+            
+            const timer = setInterval(function() {
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    countdownElement.innerHTML = "Time's up!";
+                } else {
+                    countdownElement.innerHTML = timeLeft + " seconds remaining";
+                }
+                timeLeft -= 1;
+            }, 1000); // Set the interval to 1 second (1000 ms)
+        }
+    </script>

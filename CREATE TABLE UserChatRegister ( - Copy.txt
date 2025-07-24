@@ -1,0 +1,173 @@
+CREATE TABLE UserChatRegister (
+    RegisterId INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(100) NOT NULL,
+role bydefault null
+
+    Phone NVARCHAR(20) NOT NULL,
+    SessionId UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(),
+    IsActive BIT DEFAULT 1,                  -- Currently online or not
+    IsChatting BIT DEFAULT 0,                -- If currently in active chat
+    LastSeen DATETIME NULL,                  -- Last time user was seen
+    RegisteredAt DATETIME DEFAULT GETDATE()
+);
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import * as signalR from '@microsoft/signalr';
+
+export default function ChatPage() {
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
+  const [input, setInput] = useState('');
+  const [status, setStatus] = useState('Connecting...');
+  const [username, setUsername] = useState('');
+  const [phone, setPhone] = useState('');
+  const [step, setStep] = useState<'askName' | 'askPhone' | 'chat'>('askName');
+  const [showChat, setShowChat] = useState(false);
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl('https://localhost:44345/chathub')
+      .withAutomaticReconnect()
+      .build();
+
+    connectionRef.current = connection;
+
+    connection.on('YouAreConnected', () => {
+      setStatus("🟢 You're connected with admin.");
+    });
+
+    connection.on('YouAreInQueue', () => {
+      setStatus("⏳ You're in the waiting list. Please wait...");
+    });
+
+    connection.on('ReceiveMessage', (sender: string, message: string) => {
+      setMessages(prev => [...prev, { role: sender, content: message }]);
+    });
+
+    connection
+      .start()
+      .then(() => {
+        console.log('✅ SignalR connected');
+        setMessages([{ role: 'ai', content: '👋 Hello! May I know your name, sir?' }]);
+      })
+      .catch(err => console.error('❌ SignalR error:', err));
+
+    return () => {
+      connection.stop();
+    };
+  }, []);
+
+  const handleSend = async () => {
+    const connection = connectionRef.current;
+    const trimmedInput = input.trim();
+    if (!trimmedInput || !connection) return;
+
+    setMessages(prev => [...prev, { role: 'user', content: trimmedInput }]);
+
+    if (step === 'askName') {
+      setUsername(trimmedInput);
+      setMessages(prev => [
+        ...prev,
+        { role: 'user', content: trimmedInput },
+        { role: 'ai', content: '📱 Thank you! May I know your phone number?' }
+      ]);
+      setStep('askPhone');
+    } else if (step === 'askPhone') {
+      setPhone(trimmedInput);
+      try {
+        if (connection.state !== signalR.HubConnectionState.Connected) {
+          await connection.start();
+        }
+        await connection.invoke('RegisterUser', username, trimmedInput);
+        setMessages(prev => [
+          ...prev,
+          { role: 'user', content: trimmedInput },
+          { role: 'ai', content: '✅ You are registered! Please enter your message below.' }
+        ]);
+        setStep('chat');
+      } catch (err) {
+        setMessages(prev => [
+          ...prev,
+          { role: 'ai', content: '❌ Failed to register. Please try again later.' }
+        ]);
+      }
+    } else {
+      if (connection.state !== signalR.HubConnectionState.Connected) {
+        try {
+          await connection.start();
+        } catch (err) {
+          console.error('❌ Connection issue on SendMessage:', err);
+          return;
+        }
+      }
+      await connection.invoke('SendMessage', 'User', trimmedInput);
+    }
+
+    setInput('');
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  return (
+    <>
+      {/* Floating Chat Icon Button */}
+      {!showChat && (
+        <button
+          onClick={() => setShowChat(true)}
+          className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-xl z-50 hover:bg-blue-700 transition"
+          aria-label="Open chat"
+        >
+          💬
+        </button>
+      )}
+
+      {/* Chat Panel */}
+      {showChat && (
+        <div className="fixed bottom-4 right-4 w-80 max-w-full z-50 font-sans">
+          <div className="bg-white rounded-2xl shadow-xl flex flex-col h-[500px] border border-gray-300">
+            {/* Header */}
+            <div className="bg-blue-600 text-white px-4 py-3 rounded-t-2xl font-semibold flex items-center justify-between">
+              <span className="flex items-center gap-2">🏡 Live Chat</span>
+              <button onClick={() => setShowChat(false)} className="text-white text-xl font-bold hover:text-red-200">×</button>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
+              <div className="text-xs text-gray-500 italic">{status}</div>
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`p-2 max-w-xs rounded-2xl text-sm whitespace-pre-line ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-200'}`}>
+                    {msg.content}
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Box */}
+            <div className="p-2 border-t bg-white flex items-center gap-2">
+              <input
+                type="text"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring focus:border-blue-400"
+                placeholder="Type a message..."
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSend()}
+              />
+              <button
+                onClick={handleSend}
+                className="bg-blue-600 text-white text-sm px-4 py-2 rounded-full hover:bg-blue-700"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

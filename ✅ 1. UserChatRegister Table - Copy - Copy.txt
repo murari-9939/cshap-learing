@@ -1,0 +1,130 @@
+✅ 1. UserChatRegister Table
+Stores each guest chat session (one session per user, reused for 24 hours):
+
+sql
+Copy
+Edit
+CREATE TABLE UserChatRegister (
+    RegisterId INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(100) NULL,                 -- Optional (kept nullable for future)
+    Phone NVARCHAR(20) NULL,                     -- Optional
+    SessionId UNIQUEIDENTIFIER NOT NULL UNIQUE,  -- Used as session key
+    IsActive BIT DEFAULT 1,                      -- Online status
+    IsChatting BIT DEFAULT 0,                    -- Actively chatting
+    LastSeen DATETIME NULL,                      -- When user was last active
+    RegisteredAt DATETIME DEFAULT GETDATE()      -- When this session started
+);
+✅ 2. Messages Table
+Stores all messages sent by guest and assistant (linked via SessionId):
+
+sql
+Copy
+Edit
+CREATE TABLE Messages (
+    MessageId INT IDENTITY(1,1) PRIMARY KEY,
+    SessionId UNIQUEIDENTIFIER NOT NULL,          -- Foreign key to UserChatRegister
+    Role NVARCHAR(50) NOT NULL,                   -- 'user' or 'assistant'
+    Content NVARCHAR(MAX) NOT NULL,
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+CREATE TABLE UserChatRegister (
+    RegisterId INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(100) NOT NULL,              -- e.g., 'userchat72'
+    SessionId UNIQUEIDENTIFIER NOT NULL UNIQUE,   -- Unique session ID (persisted)
+    IpAddress NVARCHAR(45) NULL,                  -- Supports IPv6
+    UserAgent NVARCHAR(512) NULL,                 -- Device/browser info
+    IsActive BIT DEFAULT 1,                       -- Currently online
+    IsChatting BIT DEFAULT 0,                     -- In active chat
+    LastSeen DATETIME NULL,                       -- Last online timestamp
+    RegisteredAt DATETIME DEFAULT GETDATE()       -- When session started
+);
+CREATE TABLE Messages (
+    MessageId INT IDENTITY(1,1) PRIMARY KEY,
+    SessionId UNIQUEIDENTIFIER NOT NULL,
+    Role NVARCHAR(50) NOT NULL,       -- 'user' or 'assistant'
+    Content NVARCHAR(MAX) NOT NULL,
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+ private static string? AdminConnectionId = null;
+ private static ConcurrentQueue<(string connId, string username, string phone)> WaitingUsers = new();
+ private static string? ActiveUserConnectionId = null;
+
+ public override Task OnConnectedAsync()
+ {
+     Console.WriteLine($"Client connected: {Context.ConnectionId}");
+     return base.OnConnectedAsync();
+ }
+
+ public override Task OnDisconnectedAsync(Exception? exception)
+ {
+     if (Context.ConnectionId == AdminConnectionId)
+     {
+         AdminConnectionId = null;
+         ActiveUserConnectionId = null;
+     }
+     return base.OnDisconnectedAsync(exception);
+ }
+
+ public async Task RegisterUser(string username, string phone)
+ {
+     if (AdminConnectionId == null)
+     {
+         // No admin online
+         WaitingUsers.Enqueue((Context.ConnectionId, username, phone));
+         await Clients.Caller.SendAsync("YouAreInQueue");
+     }
+     else if (ActiveUserConnectionId == null)
+     {
+         // First in queue becomes active
+         ActiveUserConnectionId = Context.ConnectionId;
+         await Clients.Client(Context.ConnectionId).SendAsync("YouAreConnected");
+         await Clients.Client(AdminConnectionId).SendAsync("ChatStartedWithUser", Context.ConnectionId, username, phone);
+     }
+     else
+     {
+         // Add to waiting queue
+         WaitingUsers.Enqueue((Context.ConnectionId, username, phone));
+         await Clients.Caller.SendAsync("YouAreInQueue");
+     }
+ }
+
+ public Task RegisterAdmin()
+ {
+     AdminConnectionId = Context.ConnectionId;
+     return Task.CompletedTask;
+ }
+
+ public async Task StartChatWithUser(string userConnId)
+ {
+     ActiveUserConnectionId = userConnId;
+
+     await Clients.Client(userConnId).SendAsync("YouAreConnected");
+     await Clients.Client(AdminConnectionId!).SendAsync("ChatStartedWithUser", userConnId);
+ }
+
+ public async Task SendMessage(string sender, string message)
+ {
+     if (Context.ConnectionId == ActiveUserConnectionId && AdminConnectionId != null)
+     {
+         // User sending message to Admin
+         await Clients.Client(AdminConnectionId).SendAsync("ReceiveMessage", sender, message);
+     }
+     else if (Context.ConnectionId == AdminConnectionId && ActiveUserConnectionId != null)
+     {
+         // Admin sending to user
+         await Clients.Client(ActiveUserConnectionId).SendAsync("ReceiveMessage", sender, message);
+     }
+ }
+ public async Task GetWaitingUsers()
+ {
+     if (Context.ConnectionId != AdminConnectionId)
+     {
+         await Clients.Caller.SendAsync("Error", "Only the admin can request the waitlist.");
+         return;
+     }
+
+     var list = WaitingUsers.ToList();
+     var response = list.Select(u => new { connId = u.connId, name = u.username, phone = u.phone }).ToList();
+
+     await Clients.Caller.SendAsync("UpdateWaitlist", response);
+ }

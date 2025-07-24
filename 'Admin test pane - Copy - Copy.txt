@@ -1,0 +1,392 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import * as signalR from '@microsoft/signalr';
+
+type UserInfo = {
+  lastSeen: any;
+  username: string;
+  sessionId: string;
+  isOnline: boolean;
+  ipAddress?: string;
+  lastActivityAt?: string | null;
+};
+
+type Message = {
+  id?: string;
+  role: string;
+  content: string;
+  timestamp?: string;
+};
+
+export default function AdminChatPanel() {
+  const [userList, setUserList] = useState<UserInfo[]>([]);
+  const [unreadCounts, setUnreadCounts] = useState<{ sessionId: string; unreadMessageCount: number }[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [connectionStarted, setConnectionStarted] = useState(false);
+  const [viewMode, setViewMode] = useState<'all' | 'unread'>('all');
+const [unreadCount, setUnreadCount] = useState<number>(0);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
+
+  // SignalR connection
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl('https://localhost:44345/adminhub', { withCredentials: true })
+      .withAutomaticReconnect()
+      .configureLogging(signalR.LogLevel.None)
+      .build();
+
+    connectionRef.current = connection;
+
+    connection
+      .start()
+      .then(() => {
+        console.log('✅ SignalR connected as admin');
+        setConnectionStarted(true);
+      })
+      .catch(() => {
+      });
+
+    return () => {
+      connection.stop();
+    };
+  }, []);
+  const handleBackToUserList = () => {
+  setSelectedUser(null);
+
+  const conn = connectionRef.current;
+  if (conn) {
+    conn.invoke('GetTotalUnreadCount')
+      .then(() => console.log('🔄 Refreshed unread count'))
+      .catch(err => console.error('❌ Error refreshing unread count:', err));
+  }
+};
+
+useEffect(() => {
+  if (!connectionStarted || !connectionRef.current) return;
+  const conn = connectionRef.current;
+
+  const handleUnreadCount = (count: number) => {
+    console.log('📥 Total unread count:', count);
+    setUnreadCount(count); // ✅ store it
+  };
+
+  conn.on('ReceiveTotalUnreadCount', handleUnreadCount);
+
+  conn.invoke('GetTotalUnreadCount')
+    .then(() => console.log('✅ Asked for unread count'))
+    .catch((err) => console.error('❌ Error:', err));
+
+  return () => {
+    conn.off('ReceiveTotalUnreadCount', handleUnreadCount);
+  };
+}, [connectionStarted]);
+
+
+  // it is for reading prpose 
+// useEffect(() => {
+//   if (!connectionStarted || !connectionRef.current) return;
+//   const conn = connectionRef.current;
+
+//   // 🔊 Listeners
+//   const handleUnreadCount = (count: number) => {
+//     console.log('📥 Total unread count:', count);
+//   };
+
+//   const handleAllUsers = (users: UserInfo[]) => {
+//     console.log('👥 All users:', users);
+//   };
+
+//   const handleMessages = (messages: Message[]) => {
+//     console.log('💬 Messages:', messages);
+//   };
+
+//   conn.on('ReceiveTotalUnreadCount', handleUnreadCount);
+//   // conn.on('ReceiveAllChatUsers', handleAllUsers);
+//   // conn.on('ReceiveMessages', handleMessages);
+
+//   // 🛰️ Invokes
+//   conn.invoke('GetTotalUnreadCount');
+//   conn.invoke('GetAllChatUsers');
+//   conn.invoke('GetMessages', 'someSessionId');
+
+//   // 🧹 Cleanup
+//   return () => {
+//     conn.off('ReceiveTotalUnreadCount', handleUnreadCount);
+//     conn.off('ReceiveAllChatUsers', handleAllUsers);
+//     conn.off('ReceiveMessages', handleMessages);
+//   };
+// }, [connectionStarted]);
+
+  // Fetch messages from REST API
+  const fetchMessagesForSession = async (sessionId: string) => {
+    try {
+      const response = await fetch(`https://localhost:44345/api/Adminchat/messages/${sessionId}`);
+      if (!response.ok) throw new Error('Failed to fetch messages');
+      const data: Message[] = await response.json();
+      setMessages(data);
+    } catch (error) {
+      console.error('❌ Error fetching messages:', error);
+    }
+  };
+
+  // On user click
+  const handleUserClick = async (user: UserInfo) => {
+    setSelectedUser(user);
+    setMessages([]);
+    setTimeout(() => inputRef.current?.focus(), 200);
+
+    // Fetch message history
+    await fetchMessagesForSession(user.sessionId);
+
+    // Mark as read via SignalR
+    try {
+      await connectionRef.current?.invoke('MarkUserMessagesAsRead', user.sessionId);
+    } catch (err) {
+      console.error('❌ Failed to mark messages as read:', err);
+    }
+  };
+
+
+
+
+
+
+  // Setup SignalR listeners
+  useEffect(() => {
+    if (!connectionStarted || !connectionRef.current) return;
+
+    const conn = connectionRef.current;
+
+    // conn.on('ReceiveAllUnreadCounts', (counts) => setUnreadCounts(counts));
+    conn.on('ReceiveAllUnreadCounts', (counts) => {
+  console.log('📨 Unread counts received:', counts);
+  setUnreadCounts(counts);
+})
+    conn.on('ReceiveAllChatUsers', (users: UserInfo[]) => setUserList(users));
+    conn.on('ReceiveUnreadChatUsers', (users: UserInfo[]) => setUserList(users));
+
+    return () => {
+      conn.off('ReceiveAllUnreadCounts');
+      conn.off('ReceiveAllChatUsers');
+      conn.off('ReceiveUnreadChatUsers');
+    };
+  }, [connectionStarted]);
+
+  // Initial fetch
+  useEffect(() => {
+    if (!connectionStarted) return;
+    connectionRef.current?.invoke('GetAllUnreadCounts');
+    connectionRef.current?.invoke('GetAllChatUsers');
+  }, [connectionStarted]);
+
+  // View mode toggle
+  const handleToggleChange = async (mode: 'all' | 'unread') => {
+    setViewMode(mode);
+    try {
+      const method = mode === 'all' ? 'GetAllChatUsers' : 'GetUnreadChatUsers';
+      await connectionRef.current?.invoke(method);
+    } catch (err) {
+      console.error('❌ Failed to switch mode:', err);
+    }
+  };
+const handleExitChat = () => {
+  setSelectedUser(null);
+  setMessages([]); // clear chat history
+
+  const conn = connectionRef.current;
+  if (conn) {
+    conn.invoke('GetTotalUnreadCount')
+      .then(() => console.log('🔄 Refreshed unread count after exit'))
+      .catch(err => console.error('❌ Error refreshing count on exit:', err));
+  }
+};
+
+  // Send message
+  const handleSend = async () => {
+    if (!input.trim() || !selectedUser) return;
+
+    const newMsg: Message = {
+      role: 'admin',
+      content: input,
+      timestamp: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, newMsg]);
+    setInput('');
+
+    try {
+      await connectionRef.current?.invoke('SendMessageToUser', selectedUser.sessionId, input);
+    } catch (err) {
+      console.error('❌ Failed to send message:', err);
+    }
+  };
+
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const filteredUsers = userList.filter((user) =>
+    user.username?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="p-4 flex gap-6">
+      {/* User List */}
+      <div className="w-72 border rounded-lg p-3 bg-white shadow h-[600px] flex flex-col">
+
+        {/* Toggle */}
+        <div className="flex mb-2 gap-2">
+          <button
+            className={`text-sm px-3 py-1 rounded-full ${viewMode === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+            onClick={() => handleToggleChange('all')}
+          >
+            All
+          </button>
+          <button
+            className={`text-sm px-3 py-1 rounded-full ${viewMode === 'unread' ? 'bg-purple-600 text-white' : 'bg-gray-200'}`}
+            onClick={() => handleToggleChange('unread')}
+          >
+          Unread {unreadCount}
+
+          </button>
+        </div>
+
+        <input
+          type="text"
+          placeholder="🔍 Search users..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="mb-3 px-3 py-2 border rounded text-sm focus:outline-none focus:ring"
+        />
+
+        <div className="overflow-y-auto flex-1 space-y-2">
+          {filteredUsers.map((user) => {
+            const unread = unreadCounts.find((u) => u.sessionId === user.sessionId)?.unreadMessageCount ?? 0;
+            return (
+              <div
+                key={user.sessionId}
+                onClick={() => handleUserClick(user)}
+                className={`cursor-pointer border p-2 rounded hover:bg-green-50 ${
+                  selectedUser?.sessionId === user.sessionId ? 'bg-green-100 border-green-500' : ''
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-sm">{user.username}</p>
+                    {user.ipAddress && <p className="text-xs text-gray-500">IP: {user.ipAddress}</p>}
+                  </div>
+                  {unread > 0 && (
+                    <p className="text-xs text-purple-600 font-medium ml-auto">📨 Unread: {unread}</p>
+                  )}
+                </div>
+                <p className={`text-xs ${user.isOnline ? 'text-green-600' : 'text-red-500'}`}>
+                  {user.isOnline
+                    ? '🟢 Online'
+                    : `🔴 Last seen: ${user.lastSeen ? new Date(user.lastSeen).toLocaleString() : 'Unknown'}`}
+                </p>
+         
+              </div>
+           
+            );
+          })}
+          {/* Exit Chat Button */}
+  
+        </div>
+      </div>
+<div className="flex-1 border rounded-lg p-4 bg-white shadow h-[600px] flex flex-col">
+  {selectedUser ? (
+    <>
+      {/* Chat Header with Back Button */}
+      <div className="flex items-center gap-3 border-b pb-2 mb-2">
+   
+<button className="text-blue-800 font-extrabold text-4xl px-4 py-2 "
+  onClick={handleBackToUserList}
+  title="Back to user list"
+>
+  ←
+</button>
+
+
+
+        <div>
+          <h3 className="text-lg font-semibold">Chat with {selectedUser.username}</h3>
+          <p className="text-xs text-gray-500">
+            {selectedUser.ipAddress} •{' '}
+            {selectedUser.isOnline
+              ? '🟢 Active now'
+              : selectedUser.lastActivityAt
+                ? `🕒 Last seen: ${new Date(selectedUser.lastActivityAt).toLocaleString()}`
+                : '❓ Never connected'}
+          </p>
+        </div>
+       
+   <button
+    className="ml-auto text-red-600 border border-red-300 text-sm px-3 py-1 rounded hover:bg-red-100"
+    onClick={handleExitChat}
+    title="Exit chat"
+  >
+    ✖ Exit
+  </button>
+      </div>
+
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-y-auto space-y-2">
+        {messages.map((msg, index) => (
+          <div
+            key={msg.id || index}
+            className={`flex flex-col ${msg.role === 'admin' ? 'items-end' : 'items-start'}`}
+          >
+            <div
+              className={`p-2 max-w-xs rounded-xl text-sm ${
+                msg.role === 'admin' ? 'bg-blue-100' : 'bg-gray-200'
+              }`}
+            >
+              {msg.content}
+            </div>
+            <div className="text-[11px] text-gray-400 mt-1">
+              {msg.timestamp
+                ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : ''}
+            </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Area */}
+      <div className="pt-2 border-t mt-2 flex gap-2">
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          placeholder="Type message..."
+          className="flex-1 border px-3 py-2 rounded-full text-sm focus:outline-none"
+        />
+        <button
+          onClick={handleSend}
+          className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700"
+        >
+          Send
+        </button>
+      </div>
+    </>
+  ) : (
+    <div className="text-center text-sm text-gray-500 mt-20">
+      Select a user to begin chatting.
+    </div>
+  )}
+</div>
+
+      {/* Chat Panel */}
+     
+    </div>
+  );
+}

@@ -1,0 +1,71 @@
+ALTER PROCEDURE [dbo].[sp_FetchPropertiesByCriteria]
+    @location NVARCHAR(MAX) = NULL,
+    @property_type NVARCHAR(MAX) = NULL,
+    @min_price BIGINT = NULL,     -- Minimum price
+    @max_price BIGINT = NULL,     -- Maximum price
+    @bedrooms NVARCHAR(MAX) = NULL -- A comma-separated list of bedrooms
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Create a temporary table for fetched properties
+    CREATE TABLE #FetchedProperties (
+        property_id UNIQUEIDENTIFIER,
+        title NVARCHAR(255),
+        description NVARCHAR(MAX),
+        price BIGINT,
+        location NVARCHAR(255),
+        property_type NVARCHAR(50),
+        bedrooms INT,
+        bathrooms INT,
+        size_sqft INT
+    );
+
+    -- Insert properties that match the criteria
+    INSERT INTO #FetchedProperties
+    SELECT 
+        property_id, title, description, price, location, 
+        property_type, bedrooms, bathrooms, size_sqft
+    FROM 
+        [elandservice].[dbo].[properties_with_images]
+    WHERE 
+        (LTRIM(RTRIM(location)) = LTRIM(RTRIM(@location)) OR @location IS NULL)  -- Match location
+        AND (@property_type IS NULL OR LTRIM(RTRIM(property_type)) IN 
+            (SELECT LTRIM(RTRIM(value)) FROM STRING_SPLIT(@property_type, ',')))  -- Match property types
+        AND (@min_price IS NULL OR price >= @min_price)  -- Match minimum price
+        AND (@max_price IS NULL OR price <= @max_price)  -- Match maximum price
+        AND (@bedrooms IS NULL OR bedrooms IN 
+            (SELECT LTRIM(RTRIM(value)) FROM STRING_SPLIT(@bedrooms, ',')))  -- Match bedrooms
+
+    -- Check the count of fetched properties
+    DECLARE @PropertyCount INT;
+    SELECT @PropertyCount = COUNT(*) FROM #FetchedProperties;
+
+    -- If there are matches, return the results along with the count
+    IF @PropertyCount > 0
+    BEGIN
+        -- Return the number of properties found
+        SELECT @PropertyCount AS Total_Properties_Found;
+
+        -- Return the details of the properties
+        SELECT * FROM #FetchedProperties;
+    END
+    ELSE
+    BEGIN
+        -- Return message indicating no matching records found
+        SELECT 
+            'No matching records found for the specified location and property types: ' + 
+            ISNULL(@property_type, 'Any') + ' in ' + ISNULL(@location, 'the specified location.') AS Message, 
+            0 AS Total_Properties_Count;  
+    END
+
+    -- Cleanup
+    DROP TABLE #FetchedProperties;
+END;
+
+EXEC [dbo].[sp_FetchPropertiesByCriteria] 
+@location = 'panjab',
+@property_type = 'villadf',
+@min_price = 46000,      -- Minimum price from your range
+@max_price = 460007,     -- Maximum price from your range
+@bedrooms = '1,2';       -- Example bedrooms filter

@@ -1,0 +1,106 @@
+ALTER PROCEDURE [dbo].[sp_FetchBuyProperties]
+    @property_category NVARCHAR(50),
+    @property_type NVARCHAR(MAX) = NULL,
+    @min_price BIGINT = NULL,
+    @max_price BIGINT = NULL,
+    @bedrooms NVARCHAR(MAX) = NULL,
+    @City NVARCHAR(255) = NULL,
+    @Locality NVARCHAR(255) = NULL,
+    @Landmark NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Temporary table to store results
+    CREATE TABLE #FetchedBuyProperties (
+        property_id UNIQUEIDENTIFIER,
+        title NVARCHAR(255),
+        description NVARCHAR(MAX),
+        price BIGINT,
+        property_type NVARCHAR(50),
+        bedrooms INT,
+        bathrooms INT,
+        size_sqft INT,
+        Location NVARCHAR(MAX)  -- Single column for filtered location
+    );
+
+    -- Insert properties with only the requested location in the "Location" column
+    INSERT INTO #FetchedBuyProperties
+    SELECT
+        property_id,
+        title,
+        CAST(description AS NVARCHAR(MAX)),
+        price,
+        property_type,
+        bedrooms,
+        bathrooms,
+        size_sqft,
+        -- Display only the specific filter applied in "Location"
+        CASE 
+            WHEN @City IS NOT NULL AND City = @City THEN City
+            WHEN @Locality IS NOT NULL AND Locality = @Locality THEN Locality
+            WHEN @Landmark IS NOT NULL AND Landmark = @Landmark THEN Landmark
+            ELSE NULL 
+        END AS Location
+    FROM
+        [elandservice].[dbo].[properties_with_images]
+    WHERE
+       (@property_type IS NULL OR EXISTS (
+            SELECT 1 FROM STRING_SPLIT(@property_type, ',') AS s
+            WHERE LTRIM(RTRIM(property_type)) = LTRIM(RTRIM(s.value))
+        ))
+        AND (@min_price IS NULL OR price >= @min_price)
+        AND (@max_price IS NULL OR price <= @max_price)
+        AND (@bedrooms IS NULL OR EXISTS (
+            SELECT 1 FROM STRING_SPLIT(@bedrooms, ',') AS s
+            WHERE bedrooms = TRY_CAST(LTRIM(RTRIM(s.value)) AS INT)
+        ))
+        -- Strict location filtering
+        AND (
+            (@City IS NULL OR City = @City)
+            AND (@Locality IS NULL OR Locality = @Locality)
+            AND (@Landmark IS NULL OR Landmark = @Landmark)
+        );
+
+    -- Return filtered results
+    SELECT COUNT(*) AS Total_Properties_Found FROM #FetchedBuyProperties;
+
+    SELECT property_id, title, description, price, property_type, bedrooms, bathrooms, size_sqft, Location
+    FROM #FetchedBuyProperties;
+
+    -- Cleanup
+    DROP TABLE #FetchedBuyProperties;
+END;
+
+
+select * from properties_with_images 
+EXEC [dbo].[sp_FetchBuyProperties]
+    @property_category = 'Buy',
+   --@City = 'Bangalore',
+    --@Locality = 'MG Road,ghh'
+	@Landmark='Near ABC Mall,dbg'
+
+EXEC [dbo].[sp_FetchBuyProperties]
+    @property_category = 'Buy',
+    @Locality = 'MG Road,ghh'
+
+EXEC [dbo].[sp_FetchBuyProperties]
+    @property_category = 'Buy',
+   
+  --@Location = 'Los Angeles';
+	   @Location = 'MG Road,ghhk';
+
+EXEC [dbo].[sp_FetchBuyProperties]
+    @property_category = 'Buy',
+    @property_type = 'Apartment,Condo',
+    @min_price = 100000,
+    @max_price = 500000,
+    @bedrooms = '1,2,3',
+    @City = 'Los Angeles',
+    @Locality = 'Beverly Hills',
+    @Landmark = 'Near Rodeo Drive';
+	EXEC [dbo].[sp_FetchBuyProperties]
+	@property_category = 'Buy',
+	  @City = 'Bangalore',
+	     @Locality = 'Beverly Hills',
+		  @Landmark = 'Near Rodeo Drive';

@@ -1,0 +1,54 @@
+/app
+├── (_dashboard)
+userprofile
+page.tsx
+│   ├── superadmin
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── components
+│   │   │   ├── Users.tsx
+│   │   │   ├── Settings.tsx
+│   │   │   ├── Analytics.tsx
+│   ├── admin
+│   │   ├── layout.tsx          # Admin Dashboard Layout
+│   │   ├── page.tsx            # Admin Dashboard with Tabs
+│   │   ├── components          # Subfolder for UI Components
+│   │   │   ├── Products.tsx    # Product Management Component
+│   │   │   ├── Orders.tsx      # Orders Management Component
+│   │   │   ├── Reports.tsx     # Dashboard Reports Component
+│   ├── user
+│   │   ├── page.tsx
+│   │   ├── orders.tsx
+│   │   ├── profile.tsx
+/app
+├── dashboard
+│   ├── superadmin
+│   │   ├── layout.tsx         # Super Admin Layout
+│   │   ├── page.tsx           # Super Admin Dashboard
+│   │   ├── users
+│   │   │   ├── page.tsx       # Users Page (Accessible via URL)
+│   │   │   ├── components
+│   │   │   │   ├── UserList.tsx    # Component for listing users
+│   │   │   │   ├── UserDetails.tsx # Component for user details
+│   │   ├── settings
+│   │   │   ├── page.tsx       # Settings Page (Accessible via URL)
+│   │   │   ├── components
+│   │   │   │   ├── GeneralSettings.tsx # Component for settings
+│   │   │   │   ├── Security.tsx        # Component for security settings
+│   │   ├── analytics
+│   │   │   ├── page.tsx       # Analytics Page (Accessible via URL)
+│   │   │   ├── components
+│   │   │   │   ├── Charts.tsx     # Component for charts
+│   │   │   │   ├── Stats.tsx      # Component for statistics
+
+/app
+├── dashboard
+│   ├── superadmin
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── users
+│   │   │   ├── page.tsx  # User Management Page
+│   │   ├── settings
+│   │   │   ├── page.tsx  # Settings Page
+│   │   ├── analytics
+│   │   │   ├── page.tsx  # Analytics Page

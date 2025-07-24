@@ -1,0 +1,66 @@
+-- Table for Product Reviews
+CREATE TABLE ProductReview (
+    ReviewID INT PRIMARY KEY IDENTITY(1,1),          -- Auto-incremented unique identifier for the review
+    Rating INT NOT NULL,                             -- Rating given to the product (assuming a scale, e.g., 1 to 5)
+    Comments TEXT,                                   -- Comments about the product
+    ProductID INT NOT NULL,                          -- Foreign key referencing ProductID in Product table
+    UserID INT NOT NULL,                             -- ID of the user who gave the review
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(), -- Creation date of the review, defaulting to current date and time
+    CONSTRAINT FK_ProductReview_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+);
+
+-- Table for Wishlist
+CREATE TABLE Wishlist (
+    WishlistID INT PRIMARY KEY IDENTITY(1,1),        -- Auto-incremented unique identifier for the wishlist item
+    ProductID INT NOT NULL,                          -- Foreign key referencing ProductID in Product table
+    UserID INT NOT NULL,                             -- ID of the user who added the product to the wishlist
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(), -- Date when the product was added to the wishlist
+    CONSTRAINT FK_Wishlist_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+);
+
+-- Table for Cart
+CREATE TABLE Cart (
+    CartID INT PRIMARY KEY IDENTITY(1,1),            -- Auto-incremented unique identifier for the cart item
+    ProductID INT NOT NULL,                          -- Foreign key referencing ProductID in Product table
+    Quantity INT NOT NULL,                           -- Quantity of the product in the cart
+    UserID INT NOT NULL,                             -- ID of the user who added the product to the cart
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(), -- Date when the product was added to the cart
+    CONSTRAINT FK_Cart_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+);
+
+-- Table for Contact
+CREATE TABLE Contact (
+    ContactID INT PRIMARY KEY IDENTITY(1,1),         -- Auto-incremented unique identifier for the contact message
+    Name VARCHAR(255) NOT NULL,                      -- Name of the person contacting
+    Email VARCHAR(255) NOT NULL,                     -- Email of the person contacting
+    Subject VARCHAR(255) NOT NULL,                   -- Subject of the contact message
+    Messages TEXT NOT NULL,                          -- The contact message itself
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE()  -- Date when the contact message was created
+);
+
+-- Table for Payment
+CREATE TABLE Payment (
+    PaymentID INT PRIMARY KEY IDENTITY(1,1),         -- Auto-incremented unique identifier for the payment
+    Name VARCHAR(255) NOT NULL,                      -- Name of the cardholder
+    CardNo VARCHAR(16) NOT NULL,                     -- Card number (assuming a 16-digit card number)
+    ExpiryDate DATE NOT NULL,                        -- Expiry date of the card
+    CVVNo VARCHAR(3) NOT NULL,                       -- CVV number (assuming a 3-digit CVV number)
+    Address VARCHAR(255) NOT NULL,                   -- Billing address
+    PaymentMode VARCHAR(50) NOT NULL,                -- Mode of payment (e.g., Credit Card, Debit Card, etc.)
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE()  -- Date when the payment was created
+);
+
+-- Table for Orders
+CREATE TABLE Orders (
+    OrderDetailID INT PRIMARY KEY IDENTITY(1,1),     -- Auto-incremented unique identifier for the order detail
+    OrderNo VARCHAR(50) NOT NULL,                    -- Order number
+    ProductID INT NOT NULL,                          -- Foreign key referencing ProductID in Product table
+    Quantity INT NOT NULL,                           -- Quantity of the product ordered
+    UserID INT NOT NULL,                             -- ID of the user who placed the order
+    Status VARCHAR(50) NOT NULL,                     -- Status of the order (e.g., Pending, Completed, Cancelled)
+    PaymentID INT NOT NULL,                          -- Foreign key referencing PaymentID in Payment table
+    OrderDate DATETIME NOT NULL DEFAULT GETDATE(),   -- Date when the order was placed
+    IsCancelled BIT NOT NULL DEFAULT 0,              -- Flag indicating if the order is cancelled
+    CONSTRAINT FK_Orders_Product FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+    CONSTRAINT FK_Orders_Payment FOREIGN KEY (PaymentID) REFERENCES Payment(PaymentID)
+);

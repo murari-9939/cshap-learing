@@ -1,0 +1,22 @@
+CREATE TABLE Category (
+    CategoryID INT PRIMARY KEY IDENTITY(1,1),        -- Auto-incremented unique identifier for the category
+    CategoryName VARCHAR(255) ,              -- Name of the category
+    CategoryImageUrl VARCHAR(255),                   -- URL of the category image
+    IsActive BIT NOT NULL DEFAULT 1,                 -- Status of the category (active/inactive)
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE()  -- Creation date of the category, defaulting to current date and time
+);
+
+-- Create an index on CategoryName for faster searches
+CREATE INDEX IDX_CategoryName ON Category (CategoryName);
+CREATE TABLE Subcategory (
+    SubcategoryID INT PRIMARY KEY IDENTITY(1,1),      -- Auto-incremented unique identifier for the subcategory
+    SubcategoryName VARCHAR(255) ,            -- Name of the subcategory
+    CategoryID INT NOT NULL,                          -- Foreign key referencing CategoryID in Category table
+    IsActive BIT NOT NULL DEFAULT 1,                  -- Status of the subcategory (active/inactive)
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),  -- Creation date of the subcategory, defaulting to current date and time
+    CONSTRAINT FK_Subcategory_Category FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID)
+);
+
+-- Create an index on SubcategoryName for faster searches
+CREATE INDEX IDX_SubcategoryName ON Subcategory (SubcategoryName);
+

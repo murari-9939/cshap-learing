@@ -1,0 +1,161 @@
+CREATE TABLE StudentMaster (
+    StudentID INT PRIMARY KEY IDENTITY(101,1),,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    DateOfBirth varchar(250),
+    Gender VARCHAR(10),
+    Address VARCHAR(100),
+    ContactNumber VARCHAR(20) unique,
+    Email VARCHAR(50) unique
+);
+
+CREATE TABLE ProgramMaster (
+    ProgramID INT PRIMARY KEY IDENTITY(201,1),
+    ProgramName VARCHAR(50) unique,
+    DurationInYears INT,
+    Description VARCHAR(255)
+  FOREIGN KEY ( StudentID) REFERENCES StudentMaster( StudentID)
+);
+
+CREATE TABLE FeeMaster (
+    FeeID INT PRIMARY KEY IDENTITY(301,1),
+    StudentID INT,
+    ProgramID INT,
+
+    Semester INT,
+    TuitionFee DECIMAL(10, 2),
+    ExamFee DECIMAL(10, 2),
+    LibraryFee DECIMAL(10, 2),
+    TotalFee DECIMAL(10, 2),
+    FOREIGN KEY (StudentID) REFERENCES StudentMaster(StudentID),
+    FOREIGN KEY (ProgramID) REFERENCES ProgramMaster(ProgramID),
+ )
+
+
+SELECT * FROM StudentMaster;
+SELECT * FROM ProgramMaster;
+SELECT * FROM FeeMaster;
+
+CREATE TABLE StudentMaster (
+    StudentID INT PRIMARY KEY IDENTITY(101,1),
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    DateOfBirth DATE,
+    Gender VARCHAR(10),
+    Address VARCHAR(100),
+    ContactNumber VARCHAR(20) unique,
+    Email VARCHAR(50) unique
+);
+
+CREATE TABLE ProgramMaster (
+    ProgramID INT PRIMARY KEY IDENTITY(201,1),
+    ProgramName VARCHAR(50) ,
+    DurationInYears INT,
+    Description VARCHAR(255),
+	StudentID INT ,
+  FOREIGN KEY (StudentID) REFERENCES StudentMaster(StudentID)
+);
+ select * from 
+CREATE TABLE FeeMaster (
+    FeeID INT PRIMARY KEY IDENTITY(301,1),
+    StudentID INT,
+    ProgramID INT,
+
+    Semester INT,
+    TuitionFee DECIMAL(10, 2),
+    ExamFee DECIMAL(10, 2),
+    LibraryFee DECIMAL(10, 2),
+    TotalFee DECIMAL(10, 2),
+    FOREIGN KEY (StudentID) REFERENCES StudentMaster(StudentID),
+    FOREIGN KEY (ProgramID) REFERENCES ProgramMaster(ProgramID),
+ )
+ CREATE PROCEDURE InsertStudent
+    @FirstName VARCHAR(50),
+    @LastName VARCHAR(50),
+    @DateOfBirth DATE,
+    @Gender VARCHAR(10),
+    @Address VARCHAR(100),
+    @ContactNumber VARCHAR(20),
+    @Email VARCHAR(50)
+AS
+BEGIN
+    INSERT INTO StudentMaster (
+        FirstName, 
+        LastName, 
+        DateOfBirth, 
+        Gender, 
+        Address, 
+        ContactNumber, 
+        Email
+    )
+    VALUES (
+        @FirstName, 
+        @LastName, 
+        @DateOfBirth, 
+        @Gender, 
+        @Address, 
+        @ContactNumber, 
+        @Email
+    );
+END;
+EXEC InsertStudent
+    @FirstName = 'John',
+    @LastName = 'Doe',
+    @DateOfBirth = '1990-01-01',
+    @Gender = 'Male',
+    @Address = '123 Main St',
+    @ContactNumber = '1234567890',
+    @Email = 'john.doe@example.com';
+
+
+	CREATE PROCEDURE InsertProgram
+    @StudentID INT,
+    @ProgramName VARCHAR(50),
+    @DurationInYears INT,
+    @Description VARCHAR(255)
+AS
+BEGIN
+    BEGIN TRY
+        -- Check if the student is not already in ProgramMaster
+        IF NOT EXISTS (
+            SELECT 1 
+            FROM ProgramMaster 
+            WHERE StudentID = @StudentID
+        )
+        BEGIN
+            -- Insert into ProgramMaster
+            INSERT INTO ProgramMaster (
+                StudentID,
+                ProgramName,
+                DurationInYears,
+                Description
+            )
+            VALUES (
+                @StudentID,
+                @ProgramName,
+                @DurationInYears,
+                @Description
+            );
+
+			select* from 
+
+
+            SELECT 'Success' AS Status;
+        END
+        ELSE
+        BEGIN
+            SELECT 'Error: Student is already in ProgramMaster' AS Status;
+        END;
+    END TRY
+    BEGIN CATCH
+        SELECT 'Error: ' + ERROR_MESSAGE() AS Status;
+    END CATCH
+END;
+
+EXEC InsertProgram
+   
+    @ProgramName = 'Computer Science',
+    @DurationInYears = 4,
+    @Description = 'Bachelor of Science in Computer Science';
+
+	select* from ExportMaster

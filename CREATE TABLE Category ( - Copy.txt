@@ -1,0 +1,47 @@
+ CREATE TABLE Category (
+    CategoryId INT IDENTITY(1,1) PRIMARY KEY, -- Auto-incremented unique ID for each category
+    CategoryName NVARCHAR(100) NOT NULL,      -- Name of the category
+    Description NVARCHAR(MAX) NULL,          -- Optional description of the category
+    CreatedAt DATETIME DEFAULT GETDATE(),    -- Timestamp when the category is created
+    UpdatedAt DATETIME DEFAULT GETDATE()     -- Timestamp when the category is updated
+);
+CREATE TABLE Subcategory (
+    SubcategoryId INT IDENTITY(1,1) PRIMARY KEY, -- Auto-incremented unique ID for each subcategory
+    SubcategoryName NVARCHAR(100) NOT NULL,      -- Name of the subcategory
+    CategoryId INT NOT NULL,                     -- Foreign key referencing the Category table
+    Description NVARCHAR(MAX) NULL,             -- Optional description of the subcategory
+    CreatedAt DATETIME DEFAULT GETDATE(),       -- Timestamp when the subcategory is created
+    UpdatedAt DATETIME DEFAULT GETDATE(),       -- Timestamp when the subcategory is updated
+    CONSTRAINT FK_Subcategory_Category FOREIGN KEY (CategoryId)
+    REFERENCES Category(CategoryId) ON DELETE CASCADE -- Cascade deletion if a category is deleted
+);
+INSERT INTO Category (CategoryName, Description)
+VALUES 
+    ('Loan Enquiry', 'Enquiries related to loan services'),
+    ('General Enquiry', 'General queries about the platform or services'),
+    ('Complaint', 'Issues or complaints regarding services'),
+    ('Feedback', 'Suggestions or feedback from users'),
+    ('Service Request', 'Requests for specific services');
+Insert Subcategories
+sql
+Copy code
+INSERT INTO Subcategory (SubcategoryName, CategoryId, Description)
+VALUES 
+    ('Home Loan', 1, 'Enquiry about home loan services'),       -- Loan Enquiry
+    ('Personal Loan', 1, 'Enquiry about personal loan services'), -- Loan Enquiry
+    ('Business Loan', 1, 'Enquiry about business loan services'), -- Loan Enquiry
+    ('Website Issue', 3, 'Issues related to the website'),        -- Complaint
+    ('Mobile App Issue', 3, 'Issues related to the mobile app'),  -- Complaint
+    ('Positive Feedback', 4, 'Positive feedback about services'), -- Feedback
+    ('Negative Feedback', 4, 'Critical feedback for improvement'), -- Feedback
+    ('Custom Loan Scheme', 5, 'Request for a custom loan scheme'); -- Service Request
+
+CREATE PROCEDURE GetSubcategoriesByCategoryName
+    @CategoryName NVARCHAR(100)
+AS
+BEGIN
+    SELECT C.CategoryName, S.SubcategoryName, S.Description
+    FROM Subcategory S
+    INNER JOIN Category C ON S.CategoryId = C.CategoryId
+    WHERE C.CategoryName = @CategoryName;
+END;

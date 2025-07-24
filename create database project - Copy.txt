@@ -1,0 +1,257 @@
+create database project
+use  project
+DROP TABLE IF EXISTS StudentMaster;
+DROP TABLE IF EXISTS ProgramMaster;
+DROP TABLE IF EXISTS FeeMaster;
+-- Student Master Table
+drop  TABLE StudentMaster
+CREATE TABLE StudentMaster (
+    StudentID INT PRIMARY KEY IDENTITY(101,1),
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    DateOfBirth DATE,
+    Gender VARCHAR(10),
+    Address VARCHAR(100),
+    ContactNumber VARCHAR(20) unique,
+    Email VARCHAR(50) unique
+);
+drop TABLE ProgramMaster
+CREATE TABLE ProgramMaster (
+    ProgramID INT PRIMARY KEY IDENTITY(201,1),
+    ProgramName VARCHAR(50),
+    DurationInYears INT,
+    Description VARCHAR(255),
+	StudentID int,
+  FOREIGN KEY (StudentID) REFERENCES StudentMaster(StudentID)
+);
+
+CREATE TABLE FeeMaster (
+    FeeID INT PRIMARY KEY IDENTITY(301,1),
+    StudentID INT,
+    ProgramID INT,
+
+    Semester INT,
+    TuitionFee DECIMAL(10, 2),
+    ExamFee DECIMAL(10, 2),
+    LibraryFee DECIMAL(10, 2),
+    TotalFee DECIMAL(10, 2),
+    FOREIGN KEY (StudentID) REFERENCES StudentMaster(StudentID),
+    FOREIGN KEY (ProgramID) REFERENCES ProgramMaster(ProgramID),
+ )
+  SELECT * FROM StudentMaster
+ SELECT * FROM ProgramMaster;
+
+SELECT * FROM FeeMaster;
+
+
+CREATE PROCEDURE InsertStudent
+    @FirstName VARCHAR(50),
+    @LastName VARCHAR(50),
+    @DateOfBirth DATE,
+    @Gender VARCHAR(10),
+    @Address VARCHAR(100),
+    @ContactNumber VARCHAR(20),
+    @Email VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO StudentMaster (
+        FirstName,
+        LastName,
+        DateOfBirth,
+        Gender,
+        Address,
+        ContactNumber,
+        Email
+    )
+    VALUES (
+        @FirstName,
+        @LastName,
+        @DateOfBirth,
+        @Gender,
+        @Address,
+        @ContactNumber,
+        @Email
+    );
+END;
+EXEC InsertStudent
+    @FirstName = 'John',
+    @LastName = 'Doe',
+    @DateOfBirth = '1990-01-15',
+    @Gender = 'Male',
+    @Address = '123 Main St',
+    @ContactNumber = '1234678968',
+    @Email = 'johnkdo@example57.com';
+	
+
+drop PROCEDURE InsertProgram
+CREATE PROCEDURE InsertProgram
+    @ProgramName VARCHAR(50),
+    @DurationInYears INT,
+    @Description VARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @StudentID INT;
+
+    -- Insert a dummy row into StudentMaster to get a new StudentID
+    
+
+    -- Get the newly generated StudentID
+    SET @StudentID = SCOPE_IDENTITY();
+
+    -- Check if the StudentID already exists in ProgramMaster
+    IF NOT EXISTS (SELECT 1 FROM ProgramMaster WHERE StudentID = @StudentID)
+    BEGIN
+        -- Insert into ProgramMaster with the generated StudentID
+        INSERT INTO ProgramMaster (
+            ProgramName,
+            DurationInYears,
+            Description,
+            StudentID
+        )
+        VALUES (
+            @ProgramName,
+            @DurationInYears,
+            @Description,
+            @StudentID
+        );
+    END
+    BEGIN
+        -- If the StudentID already exists, print an error message
+        PRINT 'Error: StudentID already exists in ProgramMaster.';
+    END;
+    
+END;
+EXEC InsertProgram
+    @ProgramName = 'Computer Sciencemkjk',
+    @DurationInYears = 4,
+    @Description = 'Bachelor of Science in Computer Sciencebn';
+
+
+
+
+
+
+
+	CREATE PROCEDURE InsertProgram
+    @ProgramName VARCHAR(50),
+    @DurationInYears INT,
+    @Description VARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @StudentID INT;
+
+    -- Insert a dummy row into StudentMaster to get a new StudentID
+   
+
+    -- Get the newly generated StudentID
+    SET @StudentID = SCOPE_IDENTITY();
+
+    -- Check if the StudentID already exists in ProgramMaster
+    IF NOT EXISTS (SELECT 1 FROM ProgramMaster WHERE StudentID = @StudentID)
+    BEGIN
+        -- Insert into ProgramMaster with the generated StudentID
+        INSERT INTO ProgramMaster (
+            ProgramName,
+            DurationInYears,
+            Description,
+            StudentID
+        )
+        VALUES (
+            @ProgramName,
+            @DurationInYears,
+            @Description,
+            @StudentID
+        );
+
+        PRINT 'Program inserted successfully.';
+    END
+    ELSE
+    BEGIN
+        -- If the StudentID already exists, print an error message
+        PRINT 'Error: StudentID already exists in ProgramMaster.';
+    END;
+END;
+
+
+
+CREATE PROCEDURE InsertProgram
+    @ProgramName VARCHAR(50),
+    @DurationInYears INT,
+    @Description VARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @StudentID INT;
+
+    -- Insert a dummy row into StudentMaster to get a new StudentID
+   
+
+    -- Get the newly generated StudentID
+    SET @StudentID = SCOPE_IDENTITY();
+
+    -- Insert into ProgramMaster with the generated StudentID
+    INSERT INTO ProgramMaster (
+        ProgramName,
+        DurationInYears,
+        Description,
+        StudentID
+    )
+    VALUES (
+        @ProgramName,
+        @DurationInYears,
+        @Description,
+        @StudentID
+    );
+END;
+
+CREATE PROCEDURE InsertProgram
+    @ProgramName VARCHAR(50),
+    @DurationInYears INT,
+    @Description VARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @StudentID INT;
+
+    -- Insert a dummy row into StudentMaster to get a new StudentID
+    INSERT INTO StudentMaster DEFAULT VALUES;
+
+    -- Get the newly generated StudentID
+    SET @StudentID = SCOPE_IDENTITY();
+
+    -- Check if the StudentID already exists in ProgramMaster
+    IF NOT EXISTS (SELECT 1 FROM ProgramMaster WHERE StudentID = @StudentID)
+    BEGIN
+        -- Insert into ProgramMaster with the generated StudentID
+        INSERT INTO ProgramMaster (
+            ProgramName,
+            DurationInYears,
+            Description,
+            StudentID
+        )
+        VALUES (
+            @ProgramName,
+            @DurationInYears,
+            @Description,
+            @StudentID
+        );
+    END
+    ELSE
+    BEGIN
+        -- If the StudentID already exists, you may handle it as needed (e.g., raise an error)
+        print('StudentID already exists in ProgramMaster.' );
+    END;
+END;
+
+EXEC InsertProgram
+    @ProgramName = 'Computer Sciencem',
+    @DurationInYears = 4,
+    @Description = 'Bachelor of Science in Computer Science';

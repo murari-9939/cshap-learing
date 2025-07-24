@@ -1,0 +1,63 @@
+..........leetcode qestions............
+
+1. diffrence of thwo string
+
+ static char FindTheDifference(string s, string t)
+ {
+     int sumS = 0, sumT = 0;
+
+     // Sum all characters in string s
+     foreach (char c in s)
+     {
+         sumS += c;
+     }
+
+     // Sum all characters in string t
+     foreach (char c in t)
+     {
+         sumT += c;
+     }
+
+     // The difference between the sums is the extra character
+     return (char)(sumT - sumS);
+ }
+
+
+     string s = "abcd";
+     string t = "abcde";
+
+     char result = FindTheDifference(s, t);
+     Console.WriteLine($"The extra character is: {result}");
+
+2......sum of two string
+using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Example 1
+        string num1 = "11", num2 = "123";
+        string result1 = AddStrings(num1, num2);
+        Console.WriteLine(result1);  // Output: "134"
+        
+        // Example 2
+        string num1_2 = "456", num2_2 = "77";
+        string result2 = AddStrings(num1_2, num2_2);
+        Console.WriteLine(result2);  // Output: "533"
+    }
+
+    static string AddStrings(string num1, string num2)
+    {
+        // Convert strings to integers
+        int number1 = int.Parse(num1);
+        int number2 = int.Parse(num2);
+
+        // Add the integers
+        int sum = number1 + number2;
+
+        // Return the sum as a string
+        return sum.ToString();
+    }
+}
+

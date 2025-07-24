@@ -1,0 +1,247 @@
+// app/page.tsx
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
+
+export default function RealEstateAssistant() {
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: "Hi! 👋 I'm your AI assistant. I can help you find properties, filter by location or budget, or schedule a site visit. What are you looking for today?" },
+  ]);
+  const [input, setInput] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+const handleSend = async () => {
+  if (!input.trim()) return;
+
+  const userMessage = { role: 'user', content: input };
+  setMessages(prev => [...prev, userMessage]);
+  setInput('');
+
+  try {
+    const searchRes = await axios.get(`/api/SearchProperties?query=${encodeURIComponent(input)}`);
+    const results = searchRes.data;
+
+    let responseText = results.length
+      ? `🔍 I found ${results.length} properties:\n` + results.map(p => `🏠 ${p.title} - ₹${p.price}`).join('\n')
+      : "😕 Sorry, I couldn't find any matching properties.";
+
+    setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+  } catch (error) {
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: "⚠️ Something went wrong while searching. Try again later."
+    }]);
+  }
+};
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+
+    try {
+      const response = await axios.post('/api/chat', {
+        messages: [...messages, userMessage],
+      });
+      const assistantMessage = response.data;
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Sorry, I couldn\'t process your request. Please try again later.' }]);
+    }
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  return (
+    <>
+      {/* Chat Icon Only When Closed */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-4 right-4 bg-blue-600 text-white rounded-full p-3 shadow-lg z-50 hover:bg-blue-700"
+          title="Chat with AI Assistant"
+        >
+          💬
+        </button>
+      )}
+
+      {isOpen && (
+        <div className="fixed bottom-4 right-4 w-80 max-w-full z-50 font-sans">
+          <div className="bg-white rounded-2xl shadow-xl flex flex-col h-[500px] border border-gray-300">
+            <div className="bg-blue-600 text-white px-4 py-3 rounded-t-2xl font-semibold flex items-center justify-between">
+              <span className="flex items-center gap-2">🏡 AI Real Estate Assistant</span>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white text-xl leading-none hover:text-gray-200"
+                title="Close Chat"
+              >
+                ×
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`p-2 max-w-xs rounded-2xl text-sm whitespace-pre-line ${msg.role === 'user' ? 'bg-blue-100 text-right' : 'bg-gray-200'}`}>{msg.content}</div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className="p-2 border-t bg-white flex items-center gap-2">
+              <input
+                type="text"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring focus:border-blue-400"
+                placeholder="Type your question..."
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSend()}
+              />
+              <button
+                onClick={handleSend}
+                className="bg-blue-600 text-white text-sm px-4 py-2 rounded-full"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+// app/page.tsx
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
+
+export default function RealEstateAssistant() {
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: "Hi! 👋 I'm your AI assistant. I can help you find properties, filter by location or budget, or schedule a site visit. What are you looking for today?" },
+  ]);
+  const [input, setInput] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Helper: Extract filters from input text
+function parseInputToFilters(input: string) {
+  const filters: any = { query: input };
+
+  const priceMatch = input.match(/under (\d+)\s*(lakhs?|l|cr|crores?)/i);
+  if (priceMatch) {
+    let amount = parseInt(priceMatch[1]);
+    const unit = priceMatch[2].toLowerCase();
+    if (unit.includes('cr') || unit.includes('crore')) {
+      filters.maxPrice = amount * 10000000;
+    } else {
+      filters.maxPrice = amount * 100000;
+    }
+  }
+
+  const bhkMatch = input.match(/(\d+)\s*(bhk|bedroom)/i);
+  if (bhkMatch) {
+    filters.bedrooms = parseInt(bhkMatch[1]);
+  }
+
+  const cityMatch = input.match(/in ([a-zA-Z\s]+)/i);
+  if (cityMatch) {
+    filters.city = cityMatch[1].trim();
+  }
+
+  return filters;
+}
+
+const handleSend = async () => {
+  if (!input.trim()) return;
+
+  const userMessage = { role: 'user', content: input };
+  setMessages(prev => [...prev, userMessage]);
+  setInput('');
+
+  try {
+    const filters = parseInputToFilters(input);
+    const params = new URLSearchParams(filters).toString();
+    const searchRes = await axios.get(`https://localhost:44345/api/ChatApi/SearchProperties?${params}`);
+
+    const results = searchRes.data;
+
+    let responseText = results.length
+      ? `🔍 Found ${results.length} properties:\n` +
+        results.map(p => `🏠 ${p.title} - ₹${p.price}`).join('\n')
+      : "😕 Sorry, no matching properties were found.";
+
+    setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+  } catch (error) {
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: "⚠️ Something went wrong while searching. Please try again later."
+    }]);
+  }
+};
+
+
+
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  return (
+    <>
+      {/* Chat Icon Only When Closed */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-4 right-4 bg-blue-600 text-white rounded-full p-3 shadow-lg z-50 hover:bg-blue-700"
+          title="Chat with AI Assistant"
+        >
+          💬
+        </button>
+      )}
+
+      {isOpen && (
+        <div className="fixed bottom-4 right-4 w-80 max-w-full z-50 font-sans">
+          <div className="bg-white rounded-2xl shadow-xl flex flex-col h-[500px] border border-gray-300">
+            <div className="bg-blue-600 text-white px-4 py-3 rounded-t-2xl font-semibold flex items-center justify-between">
+              <span className="flex items-center gap-2">🏡 AI Real Estate Assistant</span>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white text-xl leading-none hover:text-gray-200"
+                title="Close Chat"
+              >
+                ×
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`p-2 max-w-xs rounded-2xl text-sm whitespace-pre-line ${msg.role === 'user' ? 'bg-blue-100 text-right' : 'bg-gray-200'}`}>{msg.content}</div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className="p-2 border-t bg-white flex items-center gap-2">
+              <input
+                type="text"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring focus:border-blue-400"
+                placeholder="Type your question..."
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSend()}
+              />
+              <button
+                onClick={handleSend}
+                className="bg-blue-600 text-white text-sm px-4 py-2 rounded-full"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

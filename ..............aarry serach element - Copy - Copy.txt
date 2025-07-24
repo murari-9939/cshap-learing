@@ -1,0 +1,848 @@
+merge tow sorted aay
+
+int[] arr1 = { 1, 3, 5 };
+int[] arr2 = { 2, 4, 6 };
+
+int[] merged = new int[arr1.Length + arr2.Length];
+int i = 0, j = 0, k = 0;
+
+while (i < arr1.Length && j < arr2.Length)
+{
+    if (arr1[i] < arr2[j])
+        merged[k++] = arr1[i++];
+    else
+        merged[k++] = arr2[j++];
+}
+
+while (i < arr1.Length) merged[k++] = arr1[i++];
+while (j < arr2.Length) merged[k++] = arr2[j++];
+
+Console.WriteLine("Merged Array: " + string.Join(", ", merged));
+
+
+int[] arr1 = { 1, 3, 5 };
+int[] arr2 = { 2, 4, 6 };
+
+var merged = arr1.Concat(arr2).OrderBy(x => x).ToArray();
+
+Console.WriteLine("Merged Array: " + string.Join(", ", merged));
+
+
+
+.....................two dimsional array
+
+It looks like you're trying to find the missing numbers in a given sequence. Here's a complete implementation to find and print missing numbers in the array:
+
+Corrected Code:
+csharp
+Copy
+Edit
+
+Explanation:
+The array { 1, 2, 3, 4, 8 } has missing numbers 5, 6, and 7.
+The function iterates from the smallest (min) to the largest (max) value in the array.
+It checks if a number exists in the array using Array.IndexOf(arr, i).
+If a number is missing, it prints that number.
+Output:
+yaml
+Copy
+Edit
+Missing numbers:
+5 6 7
+Would you like a different approach, such as using a HashSet for better performance? 🚀
+
+
+
+
+
+
+
+You said:
+use simple apprach
+ChatGPT said:
+Here's a simple approach to find the missing numbers in an array without using any built-in functions like Array.IndexOf:
+
+Simple C# Code:
+csharp
+Copy
+Edit
+using System;
+int[] arr = { 1, 2, 3, 6 };  
+// Missing numbers are: 0, 4, 5
+✅ Correct Version: Find All Missing Numbers
+csharp
+Copy
+Edit
+using System;
+using System.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        int[] arr = { 1, 2, 3, 6 };
+        findmissing(arr);
+    }
+
+    static void findmissing(int[] arr)
+    {
+        int max = arr.Max();
+
+        Console.WriteLine("Missing numbers:");
+
+        for (int i = 0; i <= max; i++)
+        {
+            if (!arr.Contains(i))
+            {
+                Console.WriteLine(i);
+            }
+        }
+    }
+class Program
+{
+    static void findMissingNumbers(int[] arr)
+    {
+        Console.WriteLine("Missing numbers:");
+
+        for (int i = arr[0]; i < arr[arr.Length - 1]; i++)
+        {
+            bool found = false;
+            for (int j = 0; j < arr.Length; j++)
+            {
+                if (arr[j] == i)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                Console.Write(i + " ");
+            }
+        }
+        Console.WriteLine();
+    }
+
+    static void Main()
+    {
+        int[] arr = { 1, 2, 3, 4, 8 };
+        findMissingNumbers(arr);
+    }
+}
+int x = 12345;
+
+
+
+toatsum(x);
+   static void toatsum(int k)
+    {
+        int sum = k.ToString()
+                   .ToCharArray()
+                   .Sum(c => c - '0');
+
+        Console.WriteLine("Total Sum of Digits: " + sum);
+    }
+
+Explanation:
+Iterate from the first (arr[0]) to the last (arr[arr.Length - 1]) number.
+Check manually if each number exists in the array using a nested loop.
+If not found, print the missing number.
+int[][] arr1 = {
+            new int[] {1, 2, 3, 4, 5},
+            new int[] {1, 2, 3, 4, 56, 6}
+        };
+
+for (int i = 0; i < arr1.Length; i++)
+{
+    for (int j = 0; j < arr1[i].Length; j++) // Use arr1[i].Length to get the length of the current sub-array
+    {
+        Console.Write(arr1[i][j] + "\t");
+    }
+    // Move to the next line after printing a row
+    Console.WriteLine();
+}
+   ............sorting two dimesnions array
+
+
+int[][] arr1 = {
+            new int[] {1, 6, 3, 4, 5},
+            new int[] {1,5, 3, 4, 56}
+        };
+// Sorting each row
+for (int i = 0; i < arr1.Length; i++)
+{
+    Array.Sort(arr1[i]);
+}
+for (int i = 0; i < arr1.Length; i++)
+{
+    for (int j = 0; j < arr1[i].Length; j++) // Use arr1[i].Length to get the length of the current sub-array
+    {
+        Console.Write(arr1[i][j] + "\t");
+    }
+    // Move to the next line after printing a row
+    Console.WriteLine();
+}
+.......................two diensional arry sorting
+
+
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int[][] arr1 = {
+            new int[] {1, 6, 3, 4, 5},
+            new int[] {1, 5, 3, 4, 56}
+        };
+
+        // Sorting each row using Bubble Sort
+        for (int i = 0; i < arr1.Length; i++)
+        {
+            BubbleSort(arr1[i]);
+        }
+
+        // Printing the sorted array
+        for (int i = 0; i < arr1.Length; i++)
+        {
+            for (int j = 0; j < arr1[i].Length; j++) 
+            {
+                Console.Write(arr1[i][j] + "\t");
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // Bubble Sort function to sort a single row (array)
+    static void BubbleSort(int[] array)
+    {
+        int n = array.Length;
+        for (int i = 0; i < n - 1; i++)
+        {
+            for (int j = 0; j < n - 1 - i; j++)
+            {
+                if (array[j] > array[j + 1])
+                {
+                    // Swap the elements
+                    int temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
+                }
+            }
+        }
+    }
+}
+
+
+To find the sum of a two-dimensional array (2D array) in C#, you can use nested loops. Here's a simple example:
+
+✅ Example: Sum of 2D array
+csharp
+Copy
+Edit
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int[,] arr = {
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9}
+        };
+
+        int sum = 0;
+
+        for (int i = 0; i < arr.GetLength(0); i++)         // rows
+        {
+            for (int j = 0; j < arr.GetLength(1); j++)     // columns
+            {
+                sum += arr[i, j];
+            }
+        }
+
+        Console.WriteLine("Total sum = " + sum);
+    }
+}
+
+sum of tow one dimenion aray
+int[] arr1 = { 1, 2, 3 };
+int[] arr2 = { 4, 5, 6 };
+
+
+
+int[] sumArray = new int[arr1.Length];
+
+
+for (int i = 0; i<arr1.Length; i++)
+{
+
+ sumArray[i] = arr1[i] + arr2[i];
+
+    Console.WriteLine($"sumArray[{i}] = {sumArray[i]}");
+}
+
+🔍 Explanation:
+arr.GetLength(0) returns the number of rows.
+
+arr.GetLength(1) returns the number of columns.
+
+sum += arr[i, j]; adds each element to the total.
+
+
+using System;
+ Q averge of aaay
+class Program
+{
+    static void Main()
+    {
+        int[] arr = { 1, 2, 3, 4, 5 };
+        double average = FindAverage(arr);
+        Console.WriteLine("Average: " + average);
+    }
+
+    static double FindAverage(int[] arr)
+    {
+        int sum = 0;
+        foreach (int num in arr)
+        {
+            sum += num;
+        }
+
+        return (double)sum / arr.Length;
+    }
+}
+
+...........simple array problem
+
+int[] arr = { 1, 2, 3, 5, 6, 7 };
+
+
+
+
+for (int i = 0; i < arr.Length; i++)
+{
+
+
+   if (arr[i] >= 2){
+       
+        Console.WriteLine(arr[i]);
+}
+}
+
+
+
+
+.................removing rellle
+
+
+int[] ARR = { 1, 2, 3, 4 };
+int k = 4;
+remove(ARR, 4);
+
+static void remove(int [] ARR, int k)
+{
+
+    HashSet<int> removed = new HashSet<int>();
+
+    for (int i = 0; i < ARR.Length; i++)
+    {
+
+        if (ARR[i] != k)
+        {
+            removed.Add(i);
+
+        }
+
+        Console.WriteLine(i);
+    }
+}
+anpther method
+
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void remove(int[] arr, int k)
+    {
+        // Create a list to store the elements that are not equal to 'k'
+        List<int> result = new List<int>();
+
+        // Loop through the array and add elements that are not equal to 'k'
+        for (int i = 0; i < arr.Length; i++)
+        {
+            if (arr[i] != k)
+            {
+                result.Add(arr[i]);
+            }
+        }
+
+        // Print the resulting list
+        Console.WriteLine("Array after removing " + k + ":");
+        foreach (int i in result)
+        {
+            Console.Write(i + " ");
+        }
+    }
+
+    static void Main()
+    {
+        int[] arr = { 1, 2, 3, 4 };
+        int k = 3;
+
+        remove(arr, k);  // Call the remove function
+    }
+}
+
+..............aarry serach element
+using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello, World!");
+
+        int[] arr = { 1, 2, 3, 4 };
+        int k = 3;
+
+        // Call the search function
+        search(arr, k);
+    }
+
+    static void search(int[] arr, int k)
+    {
+        bool found = false; // Flag to check if the element is found
+
+        for (int i = 0; i < arr.Length; i++)
+        {
+            if (arr[i] == k) // Check if the current element is equal to k
+            {
+                Console.WriteLine("Element found at index: " + i);
+                found = true;
+                break; // Exit the loop once the element is found
+            }
+        }
+
+        // If the element was not found, print the message once
+        if (!found)
+        {
+            Console.WriteLine("Element not found");
+        }
+    }
+}
+
+..................element remove vail in array
+	int []arr= {1,2,3,4};
+	    	    	int k=3;
+	    	    	
+	    	    	HashSet<Integer>arr1 = new HashSet<Integer>();
+	    	    	
+	    	    	
+	    	    	for(int i =0; i<arr.length; i++) {
+	    	    		
+	    	    		
+	    	    		if(arr[i]!=k) {
+	    	    			
+	    	    		
+	    	    			
+	    	    		    arr1.add(arr[i]);
+	    	    			
+	    	    		}
+	    	    		  // Output the contents of the HashSet
+	        	       
+	    }  System.out.println("Elements in the HashSet after removal: " + arr1);
+	    	    	}
+	    	    	
+	    	    	
+
+	    	  
+	    	    	
+	    	  
+	    	      
+	
+	    	    }    
+
+...................findiing dupcacy element in array
+
+	    	        int[] arr = {1, 2, 3, 4, 2, 3, 5}; // Example array with duplicates
+	    	    	int k=3;
+	    	    	
+	    	    	
+	    	    	
+	    	    	HashSet<Integer>arr1 = new HashSet<Integer>();
+	    	    	
+	    	    	HashSet<Integer>duplicate = new HashSet<Integer>();
+	    	    	
+	    	    	
+	    	    	
+	    	    	for(int num: arr) {
+	    	    		if(!arr1.add(num)) {
+	    	    			
+	    	    			duplicate.add(num);
+	    	    		}
+	    	    		
+	    	    	}
+	    	        System.out.println("Duplicate elements: " + duplicate);
+	    	    	
+	    	    	}
+	    	    	
+	    	    	
+
+	    	  
+	    	    	
+	    	  
+	    	      
+	
+	    	    }    
+..........................
+					 // Create a list to store lines
+			        ArrayList<String> lines = new ArrayList<>();
+			        Scanner scanner = new Scanner(System.in);
+
+			        System.out.println("Enter lines of text (type 'exit' to finish):");
+
+			        // Read lines from the user until they type 'exit'
+			        while (true) {
+			            String line = scanner.nextLine();
+			            if (line.equalsIgnoreCase("exit")) {
+			                break; // Stop reading lines when 'exit' is entered
+			            }
+			            lines.add(line); // Add each line to the list
+			        }
+
+			        scanner.close();
+
+			        // Print each line from the list
+			        System.out.println("\nYou entered:");
+			        for (String line : lines) {
+			            System.out.println(line);
+			        }
+	    	    
+	    	     
+	    	  
+				}
+	    	  
+
+
+
+
+
+.................linked list
+
+class Node {
+    int data;
+    Node next;
+
+    Node(int data) {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+public class Output {
+    Node head; // Head of the linked list
+
+    // Method to add a node to the linked list
+    public void add(int data) {
+        Node newNode = new Node(data);
+
+        if (head == null) {
+            head = newNode; // If list is empty, set head to the new node
+        } else {
+            Node current = head;
+            while (current.next != null) {
+                current = current.next; // Traverse to the end of the list
+            }
+            current.next = newNode; // Link the last node to the new node
+        }
+    }
+
+    // Method to display the linked list
+    public void display() {
+        Node current = head;
+        while (current != null) {
+            System.out.print(current.data + " -> ");
+            current = current.next;
+        }
+        System.out.println("null"); // End of the list
+    }
+
+    public static void main(String[] args) {
+        Output list = new Output();
+
+        // Add some nodes
+        list.add(10);
+        list.add(20);
+        list.add(30);
+        list.add(40);
+
+        // Display the linked list
+        System.out.println("Linked List:");
+        list.display();
+    }
+}
+................linked list 
+
+
+
+Certainly! Here are some additional methods you can add to your Output class (linked list) to enhance functionality:
+
+Insert at a specific position
+Delete by value
+Find the size of the linked list
+Search for a value
+Reverse the linked list
+Here's the updated Output class with these additional methods:
+
+java
+Copy code
+class Node {
+    int data;
+    Node next;
+
+    Node(int data) {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+public class Output {
+    Node head; // Head of the linked list
+
+    // Method to add a node to the end of the linked list
+    public void add(int data) {
+        Node newNode = new Node(data);
+
+        if (head == null) {
+            head = newNode; // If list is empty, set head to the new node
+        } else {
+            Node current = head;
+            while (current.next != null) {
+                current = current.next; // Traverse to the end of the list
+            }
+            current.next = newNode; // Link the last node to the new node
+        }
+    }
+
+    // Method to display the linked list
+    public void display() {
+        Node current = head;
+        while (current != null) {
+            System.out.print(current.data + " -> ");
+            current = current.next;
+        }
+        System.out.println("null"); // End of the list
+    }
+
+    // Method to get the size of the linked list
+    public int size() {
+        int count = 0;
+        Node current = head;
+        while (current != null) {
+            count++;
+            current = current.next;
+        }
+        return count;
+    }
+
+    // Method to search for a value in the linked list
+    public boolean search(int value) {
+        Node current = head;
+        while (current != null) {
+            if (current.data == value) {
+                return true; // Value found
+            }
+            current = current.next;
+        }
+        return false; // Value not found
+    }
+
+    // Method to insert a node at a specific position
+    public void insertAt(int data, int position) {
+        Node newNode = new Node(data);
+
+        if (position == 0) { // Insert at the head
+            newNode.next = head;
+            head = newNode;
+        } else {
+            Node current = head;
+            for (int i = 0; i < position - 1 && current != null; i++) {
+                current = current.next;
+            }
+
+            if (current == null) {
+                System.out.println("Position out of bounds");
+            } else {
+                newNode.next = current.next;
+                current.next = newNode;
+            }
+        }
+    }
+
+    // Method to delete a node by value
+    public void deleteByValue(int value) {
+        if (head == null) {
+            System.out.println("List is empty.");
+            return;
+        }
+
+        if (head.data == value) { // If the head node has the value
+            head = head.next;
+            return;
+        }
+
+        Node current = head;
+        while (current.next != null && current.next.data != value) {
+            current = current.next;
+        }
+
+        if (current.next == null) {
+            System.out.println("Value not found in the list.");
+        } else {
+            current.next = current.next.next; // Remove the node
+        }
+    }
+
+    // Method to reverse the linked list
+    public void reverse() {
+        Node previous = null;
+        Node current = head;
+        Node next = null;
+        while (current != null) {
+            next = current.next; // Store the next node
+            current.next = previous; // Reverse the current node's pointer
+            previous = current; // Move pointers one position ahead
+            current = next;
+        }
+        head = previous; // Set head to the last node (new head)
+    }
+
+    public static void main(String[] args) {
+        Output list = new Output();
+
+        // Add some nodes
+        list.add(10);
+        list.add(20);
+        list.add(30);
+        list.add(40);
+
+        // Display the linked list
+        System.out.println("Linked List:");
+        list.display();
+
+        // Insert at a specific position
+        list.insertAt(25, 2);
+        System.out.println("After inserting 25 at position 2:");
+        list.display();
+
+        // Search for a value
+        System.out.println("Is 30 in the list? " + list.search(30));
+        System.out.println("Is 100 in the list? " + list.search(100));
+
+        // Get the size of the list
+        System.out.println("Size of the list: " + list.size());
+
+        // Delete a node by value
+        list.deleteByValue(20);
+        System.out.println("After deleting 20:");
+        list.display();
+
+        // Reverse the linked list
+        list.reverse();
+        System.out.println("Reversed Linked List:");
+        list.display();
+    }
+}
+Explanation of New Methods:
+size(): Counts and returns the number of nodes in the linked list.
+search(int value): Searches for a specific value in the linked list and returns true if found, otherwise false.
+insertAt(int data, int position): Inserts a new node at the specified position in the linked list.
+deleteByValue(int value): Deletes the first occurrence of a node with the given value.
+reverse(): Reverses the order of nodes in the linked list.
+Sample Output:
+The output might look like this:
+
+rust
+Copy code
+Linked List:
+10 -> 20 -> 30 -> 40 -> null
+After inserting 25 at position 2:
+10 -> 20 -> 25 -> 30 -> 40 -> null
+Is 30 in the list? true
+Is 100 in the list? false
+Size of the list: 5
+After deleting 20:
+10 -> 25 -> 30 -> 40 -> null
+Reversed Linked List:
+40 -> 30 -> 25 -> 10 -> null
+These methods give the linked list more functionality and flexibility. Let me know if you’d like any further modifications or explanations!
+
+
+
+..........................
+
+java
+Copy code
+import java.util.HashMap;
+
+public class WordCount {
+    public static void main(String[] args) {
+        String str = "the day is sunny the the\r\n" +
+                     "the sunny is is";
+        
+        HashMap<String, Integer> wordCountMap = new HashMap<String, Integer>(); 
+        
+        // Split the string into words using whitespace as a delimiter
+        String[] words = str.split("\\s+");
+        
+        // Loop through each word
+        for (String word : words) {
+            // Remove punctuation and convert to lower case for consistency
+            word = word.trim().toLowerCase();
+            
+            // If the word is already in the map, increment its count
+            if (wordCountMap.containsKey(word)) {
+                wordCountMap.put(word, wordCountMap.get(word) + 1);
+            } else {
+                // Otherwise, add it to the map with a count of 1
+                wordCountMap.put(word, 1);
+            }
+        }
+
+        // Print the word counts
+        for (String key : wordCountMap.keySet()) {
+            System.out.println(key + ": " + wordCountMap.get(key));
+        }
+    }
+}
+Explanation:
+String Splitting: The string is split into words using split("\\s+"), which uses whitespace as a delimiter.
+Word Counting:
+Each word is trimmed and converted to lowercase to ensure uniformity.
+The HashMap checks if the word already exists. If it does, it increments the count; if not, it adds the word with a count of 1.
+Output: Finally, the code iterates over the HashMap to print the word counts.
+Output:
+For the given string, the output will be:
+
+makefile
+Copy code
+the: 4
+day: 1
+is: 3
+sunny: 2
+
+
+
+
+...................
+
+
+
+
+
+
+
+

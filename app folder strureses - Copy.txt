@@ -1,0 +1,123 @@
+/app
+├── (dashboard)
+│   ├── superadmin
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── components
+│   │   │   ├── Users.tsx
+│   │   │   ├── Settings.tsx
+│   │   │   ├── Analytics.tsx
+userprofile
+page.tsx
+│   ├── admin
+│   │   ├── layout.tsx          # Admin Dashboard Layout
+│   │   ├── page.tsx            # Admin Dashboard with Tabs
+│   │   ├── components          # Subfolder for UI Components
+│   │   │   ├── Products.tsx    # Product Management Component
+│   │   │   ├── Orders.tsx      # Orders Management Component
+│   │   │   ├── Reports.tsx  
+   # Dashboard Reports Component
+│   ├── user
+layout.tsx          # Admin Dashboard Layout
+│   │   ├── page.tsx  
+├── components   
+│   │   ├── page.tsx
+│   │   ├── orders.tsx
+│   │   ├── profile.tsx
+
+/app
+ ├── (dashboard)
+ │   ├── superadmin
+ │   │   ├── layout.tsx       # Protects all SuperAdmin pages
+ │   │   ├── page.tsx         # SuperAdmin Dashboard
+ │   │   ├── components
+ │   │   │   ├── Users.tsx   
+ │   │   │   ├── Settings.tsx
+ │   │   │   ├── Analytics.tsx
+ │   ├── admin
+ │   │   ├── layout.tsx       # Protects all Admin pages
+ │   │   ├── page.tsx         # Admin Dashboard
+ │   │   ├── components
+ │   │   │   ├── Products.tsx
+ │   │   │   ├── Orders.tsx
+ │   │   │   ├── Reports.tsx  
+ │   ├── user
+ │   │   ├── layout.tsx       # Protects all User pages
+ │   │   ├── page.tsx         # User Dashboard
+ ├── login
+ │   ├── page.tsx             # Public Login Page
+ ├── register
+ │   ├── page.tsx             # Public Register Page
+
+/app
+├── (dashboard)                # Protected routes (middleware applied)
+│   ├── superadmin             # SuperAdmin Dashboard
+│   │   ├── layout.tsx         # Protects all SuperAdmin pages
+│   │   ├── page.tsx           # SuperAdmin Dashboard Home
+│   │   ├── components         # Reusable components for SuperAdmin
+│   │   │   ├── Users.tsx   
+│   │   │   ├── Settings.tsx
+│   │   │   ├── Analytics.tsx
+│   ├── admin                  # Admin Dashboard
+│   │   ├── layout.tsx         # Protects all Admin pages
+│   │   ├── page.tsx           # Admin Dashboard Home
+│   │   ├── components         # Reusable components for Admin
+│   │   │   ├── Products.tsx
+│   │   │   ├── Orders.tsx
+│   │   │   ├── Reports.tsx  
+│   ├── user                   # User Dashboard
+│   │   ├── layout.tsx         # Protects all User pages
+│   │   ├── page.tsx           # User Dashboard Home
+│   │   ├── components         # Reusable components for Users
+│   │   │   ├── Orders.tsx
+│   │   │   ├── Profile.tsx
+│   │   │   ├── Settings.tsx
+├── login
+│   ├── page.tsx               # Public Login Page
+├── register
+│   ├── page.tsx               # Public Register Page
+├── userprofile
+│   ├── page.tsx               # User Profile Page
+├── components                  # Shared UI Components
+│   ├── Navbar.tsx
+│   ├── Sidebar.tsx
+│   ├── Footer.tsx
+│   ├── Button.tsx
+│   ├── Card.tsx
+│   ├── Modal.tsx
+│   ├── Table.tsx
+│   ├── Form.tsx
+│   ├── Toast.tsx
+├── middleware.ts                # Role-based authentication logic
+├── lib                          # Utility functions and helpers
+│   ├── auth.ts                  # JWT authentication helpers
+│   ├── api.ts                   # API request functions
+├── services                     # API service layer
+│   ├── authService.ts
+│   ├── userService.ts
+│   ├── adminService.ts
+│   ├── superAdminService.ts
+├── store                        # Global state management (Redux, Zustand, etc.)
+│   ├── authStore.ts
+│   ├── userStore.ts
+│   ├── adminStore.ts
+│   ├── superAdminStore.ts
+├── styles                       # Global and component-specific styles
+│   ├── globals.css
+│   ├── theme.css
+│   ├── dashboard.css
+│   ├── form.css
+│   ├── button.css
+│   ├── table.css
+├── types                        # TypeScript types/interfaces
+│   ├── auth.ts
+│   ├── user.ts
+│   ├── admin.ts
+│   ├── superAdmin.ts
+│   ├── apiResponses.ts
+├── .env.local                   # Environment variables
+├── next.config.js               # Next.js configuration
+├── package.json                 # Dependencies and scripts
+├── tsconfig.json                 # TypeScript configuration
+├── README.md                    # Documentation
+

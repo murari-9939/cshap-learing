@@ -1,0 +1,214 @@
+[HttpGet("GetTableNames")]
+        public IActionResult GetTableNames()
+        {
+            var connStr = this.Configuration.GetConnectionString("cpu52");
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                try
+                {
+                    con.Open();
+
+                    SqlCommand sqlcmd = new SqlCommand("SELECT TableName, DisplayName FROM LPUOnlineExportMaster", con);
+                    SqlDataAdapter sda = new SqlDataAdapter();
+                    sda.SelectCommand = sqlcmd;
+                    DataSet ds = new DataSet(); // Create a DataSet to store the result
+                    sda.Fill(ds);
+                    con.Close();
+
+                    List<TableInfo> tableList = new List<TableInfo>();
+
+                    if (ds.Tables.Count > 0)
+                    {
+                        if (ds.Tables[0].Rows.Count > 0)
+                        {
+                            foreach (DataRow dr in ds.Tables[0].Rows)
+                            {
+                                TableInfo Pk = new TableInfo();
+                                Pk.TableName = dr["TableName"].ToString();
+                                Pk.DisplayName = dr["DisplayName"].ToString();
+                                tableList.Add(Pk);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Handle the case where no data was returned
+                        return NotFound("No data found");
+                    }
+                    return Ok(tableList);
+                }
+                catch (SqlException dp)
+                {
+                    return StatusCode(500, "SQL error has occurred: " + dp.Message);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, "Error: " + ex.Message);
+                }
+            }
+        }
+
+
+        [HttpGet]
+        [ActionName("GetDataAsJson")]
+        public string GetDataAsJson(string tablename)
+        {
+            var connStr = this.Configuration.GetConnectionString("cpu52");
+
+          
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+
+                try
+                {
+                    con.Open();
+
+
+
+                    SqlCommand sqlcmd = new SqlCommand("SELECT * FROM " + tablename, con);
+                    SqlDataAdapter sda = new SqlDataAdapter();
+                    sda.SelectCommand = sqlcmd;
+                    DataSet ds = new DataSet();
+                    DataTable dt = new DataTable();
+                    sda.Fill(dt);
+                    con.Close();
+
+                    string jsonData = JsonConvert.SerializeObject(dt);
+
+                    return jsonData;
+                }
+                //catch (Exception ex)
+                //{
+                //    throw new Exception(ex.ToString());
+                //}
+                catch (SqlException dp)
+                {
+                    return "sql error has occures" + dp.Message;
+                }
+                catch (Exception ex)
+                {
+                    return "error" + ex.Message;
+                }
+            }
+        } i want to create dropdown list and ect data from data dropdwon
+
+
+<script>
+    // JavaScript
+    $(document).ready(function (e) {
+       
+        var dataTable;
+
+        $("#DisplayName").change(function (e) {
+            var value = $("#DisplayName option:selected").val()
+            
+            $(this).blur();
+           
+            /* console.log(value);*/
+           /* e.preventDefault();*/
+           /*e.stopPropagation();*/
+
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: '/Dyanamic/GetDataAsJson?tablename=' + value,
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    console.log(data);
+
+                    // Check if the response contains a property named 'd'
+                    if (data.d !== undefined) {
+                        data = data.d;
+                    }
+
+                    // Check if data is empty
+                    if (data.length <= 0) {
+                        if (document.URL.toLowerCase().indexOf('Dyanamic/Index') > -1) {
+                            $("#tableContainer").html(''); // Set an empty message if needed
+                            if (dataTable) {
+                                dataTable.destroy();
+                            }
+                            return;
+                        }
+                    }
+
+                    // Generate dynamic table structure
+                    var tableHtml = '<table class="table align-middle table-row-dashed fs-6 gy-5 dataTable no-footer" id="ptable">';
+                    tableHtml += '<thead><tr class="fw-bold text-muted">';
+
+                    // Extract column names from the first row of data (assuming it contains the keys)
+                    var columnNames = Object.keys(data[0]);
+
+                    // Append column headers
+                    for (var i = 0; i < columnNames.length; i++) {
+                        tableHtml += '<th class="min-w-150px text-capitalize">' + columnNames[i] + '</th>';
+                    }
+
+                    tableHtml += '</tr></thead><tbody>';
+
+                    // Append table rows with data
+                    for (var j = 0; j < data.length; j++) {
+                        tableHtml += '<tr>';
+                        for (var k = 0; k < columnNames.length; k++) {
+                            var columnValue = data[j][columnNames[k]];
+                            tableHtml += '<td class="text-dark fw-bold text-hover-primary fs-6">' + columnValue + '</td>';
+                        }
+                        tableHtml += '</tr>';
+                    }
+
+                    tableHtml += '</tbody></table>';
+
+                    // Destroy existing DataTable (if any)
+                    if (dataTable) {
+                        dataTable.destroy();
+                    }
+
+                    // Append the dynamic table to the container
+                    $("#tableContainer").html(tableHtml);
+
+                    // Initialize DataTable with pagination
+                    dataTable = $("#ptable").DataTable({
+                        lengthChange: true,
+                        lengthMenu: [[10, 15, 25, 50, 100, -1], [10, 15, 25, 50, 100, "All"]],
+                        iDisplayLength: 10,
+                        info: true,
+                        responsive: true,
+                        processing: true,
+                        autoWidth: false,
+                        paging: true,
+
+                        scrollX: true,
+                        /*   scrollY: 400,*/
+
+
+                        // scrollCollapse: true,
+                        /* scrollX: '50vh',*/
+                        /*   scrollY: '100vh',*/
+                        ///* scrollX: true,*/
+                        scrollCollapse: !0,
+                        scroller: !0,
+
+
+                        //"sScrollX": "100%",
+                        //"sScrollXInner": "110%",
+                        "bScrollCollapse": true,
+
+                        dom: 'Blfrtip',
+                        buttons: ['excelHtml5', 'csvHtml5'],
+
+
+                    });
+
+
+                },
+
+
+
+                error: function () {
+                    alert('Failed to receive the Data');
+                    console.log('Failed');
+                }
+            });
+        });
+    });

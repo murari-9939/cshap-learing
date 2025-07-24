@@ -1,0 +1,28 @@
+CREATE TABLE ChatUsers (
+    UserId INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(100) NOT NULL,
+    Phone NVARCHAR(20) NOT NULL,
+    Email NVARCHAR(100) NULL,                -- Optional email
+    ConnectionId NVARCHAR(100) NULL,         -- SignalR connection ID
+    IsActive BIT DEFAULT 1,                  -- Currently online or not now create produres 
+    IsChatting BIT DEFAULT 0,                -- True if currently in an active chat
+    LastSeen DATETIME NULL,                  -- Last disconnection time
+            -- Useful for analytics/debug
+    Notes NVARCHAR(255) NULL,                -- Admin can add notes per user
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+CREATE TABLE ChatMessages (
+    MessageId INT IDENTITY PRIMARY KEY,
+    Sender NVARCHAR(100),
+    Receiver NVARCHAR(100),
+    MessageText NVARCHAR(MAX),
+    SentAt DATETIME DEFAULT GETDATE()
+);
+CREATE TABLE ChatSessions (
+    SessionId UNIQUEIDENTIFIER PRIMARY KEY,
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE()
+    Username NVARCHAR(100) default gust,
+ IsActive BIT DEFAULT 1,                  -- Currently online or not now create produres 
+    IsChatting BIT DEFAULT 0,                -- True if currently in an active chat
+    LastSeen DATETIME NULL,
+);

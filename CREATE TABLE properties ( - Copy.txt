@@ -1,0 +1,45 @@
+CREATE TABLE properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(12, 2) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    latitude DECIMAL(10, 6), -- Added for precise location tracking
+    longitude DECIMAL(10, 6), -- Added for precise location tracking
+    property_type ENUM('house', 'apartment', 'villa', 'pg', 'studio', 'bungalow') NOT NULL, -- Fixed duplicate 'house' and added more types
+    bedrooms INT,
+    bathrooms INT,
+    size_sqft INT,
+    year_built INT, -- Added to store the year the property was built
+    furnished ENUM('yes', 'no', 'semi') DEFAULT 'no', -- Added for furniture status
+    parking_spaces INT DEFAULT 0, -- Added to store the number of parking spaces
+    amenities JSON, -- Added for storing amenities in a flexible format
+    image_url VARCHAR(255),
+    status ENUM('available', 'sold', 'pending', 'rented') DEFAULT 'available', -- Added 'rented' status
+    seller_id INT,
+    contact_number VARCHAR(20), -- Added for seller's contact information
+    views INT DEFAULT 0, -- Added to track the number of times the property has been viewed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Added for tracking updates
+
+    -- New Columns
+    property_condition ENUM('new', 'good', 'needs_renovation') DEFAULT 'good', -- Condition of the property
+    lease_type ENUM('rent', 'sale', 'lease') NOT NULL DEFAULT 'sale', -- Lease or sale type
+    pet_friendly ENUM('yes', 'no') DEFAULT 'no', -- Indicates if pets are allowed
+    has_balcony BOOLEAN DEFAULT FALSE, -- Indicates if the property has a balcony
+    has_garden BOOLEAN DEFAULT FALSE, -- Indicates if the property has a garden
+    has_pool BOOLEAN DEFAULT FALSE, -- Indicates if the property has a swimming pool
+    security_features JSON, -- Stores security features like CCTV, gated security
+    nearest_schools JSON, -- Stores nearby schools' names
+    nearest_hospitals JSON, -- Stores nearby hospitals' names
+    nearest_transit JSON, -- Stores nearby bus/train stations
+    owner_name VARCHAR(255), -- Name of the seller or owner
+    owner_email VARCHAR(255), -- Contact email for the owner
+    listed_by ENUM('owner', 'agent', 'builder') DEFAULT 'owner', -- Who listed the property
+    featured BOOLEAN DEFAULT FALSE, -- Whether the property is featured in listings
+    discount_price DECIMAL(12, 2), -- If there's a discounted price for the property
+    possession_status ENUM('ready_to_move', 'under_construction') DEFAULT 'ready_to_move', -- Move-in status
+    availability_date DATE, -- Date when the property will be available
+
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);

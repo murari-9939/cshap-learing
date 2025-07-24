@@ -1,0 +1,253 @@
+CREATE TABLE slider_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    image_url VARCHAR(255) NOT NULL,
+    title VARCHAR(255) DEFAULT NULL,
+    description TEXT DEFAULT NULL,
+    offer_price DECIMAL(12, 2) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE DATABASE elandservice;
+USE elandservice;
+
+-- Users Table
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    phone VARCHAR(15),
+    role ENUM('buyer', 'seller', 'admin') DEFAULT 'buyer',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Properties Table (For Houses, Apartments, Villas)
+CREATE TABLE properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(12, 2) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    property_type ENUM('house', 'apartment', 'villa') NOT NULL,
+    bedrooms INT,
+    bathrooms INT,
+    size_sqft INT,
+    image_url VARCHAR(255),
+    status ENUM('available', 'sold', 'pending') DEFAULT 'available',
+    seller_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Lands Table (For Land Sales)
+CREATE TABLE lands (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(12, 2) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    land_type ENUM('agricultural', 'commercial', 'residential') NOT NULL,
+    land_area_sqft INT NOT NULL,
+    coordinates VARCHAR(100),  -- Optional (latitude, longitude)
+    image_url VARCHAR(255),
+    status ENUM('available', 'sold', 'pending') DEFAULT 'available',
+    seller_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Transactions Table (For Property and Land Sales)
+CREATE TABLE transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    property_id INT NULL,  -- Can be NULL if it's a land sale
+    land_id INT NULL,  -- Can be NULL if it's a property sale
+    buyer_id INT NOT NULL,
+    seller_id INT NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    status ENUM('pending', 'completed', 'canceled') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    FOREIGN KEY (land_id) REFERENCES lands(id) ON DELETE SET NULL,
+    FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Messages Table (For Real-Time Chat)
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+); i want to add tow images
+
+CREATE TABLE messages (
+    message_id INT PRIMARY KEY AUTO_INCREMENT,
+    sender_id INT,
+    receiver_id INT,
+    property_id INT,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(user_id),
+    FOREIGN KEY (receiver_id) REFERENCES users(user_id),
+    FOREIGN KEY (property_id) REFERENCES properties(property_id)
+);
+CREATE TABLE bookings (
+    booking_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    property_id INT,
+    booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (property_id) REFERENCES properties(property_id)
+);
+CREATE TABLE properties (
+    property_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT, 
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    type ENUM('land', 'house', 'pg') NOT NULL,
+    price DECIMAL(15,2) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    area_sqft DECIMAL(10,2),
+    bedrooms INT,
+    bathrooms INT,
+    available_from DATE,
+    images JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+CREATE DATABASE elandservice;
+USE elandservice;
+
+-- Users Table
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    phone VARCHAR(15),
+    role ENUM('buyer', 'seller', 'admin') DEFAULT 'buyer',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Properties Table (For Houses, Apartments, Villas)
+CREATE TABLE properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(12, 2) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    property_type ENUM('house', 'apartment', 'villa') NOT NULL,
+    bedrooms INT,
+    bathrooms INT,
+    size_sqft INT,
+    image_url VARCHAR(255),
+    status ENUM('available', 'sold', 'pending') DEFAULT 'available',
+    seller_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(12, 2) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    latitude DECIMAL(10, 6), -- Added for precise location tracking
+    longitude DECIMAL(10, 6), -- Added for precise location tracking
+    property_type ENUM('house', 'apartment', 'villa') NOT NULL,
+    bedrooms INT,
+    bathrooms INT,
+    size_sqft INT,
+    year_built INT, -- Added to store the year the property was built
+    furnished ENUM('yes', 'no', 'semi') DEFAULT 'no', -- Added for furniture status
+    parking_spaces INT DEFAULT 0, -- Added to store the number of parking spaces
+    amenities JSON, -- Added for storing amenities in a flexible format
+    image_url VARCHAR(255),
+    status ENUM('available', 'sold', 'pending') DEFAULT 'available',
+    seller_id INT,
+    contact_number VARCHAR(20), -- Added for seller's contact information
+    views INT DEFAULT 0, -- Added to track the number of times the property has been viewed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Added for tracking updates
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+ALTER TABLE properties ADD COLUMN amenities JSON;
+-- Lands Table (For Land Sales)
+CREATE TABLE lands (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(12, 2) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    land_type ENUM('agricultural', 'commercial', 'residential') NOT NULL,
+    land_area_sqft INT NOT NULL,
+    coordinates VARCHAR(100),  -- Optional (latitude, longitude)
+    image_url VARCHAR(255),
+    status ENUM('available', 'sold', 'pending') DEFAULT 'available',
+    seller_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Transactions Table (For Property and Land Sales)
+CREATE TABLE transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    property_id INT NULL,  -- Can be NULL if it's a land sale
+    land_id INT NULL,  -- Can be NULL if it's a property sale
+    buyer_id INT NOT NULL,
+    seller_id INT NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    status ENUM('pending', 'completed', 'canceled') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    FOREIGN KEY (land_id) REFERENCES lands(id) ON DELETE SET NULL,
+    FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Messages Table (For Real-Time Chat)
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE FAQs (
+    FAQID INT PRIMARY KEY AUTO_INCREMENT,
+    Question TEXT NOT NULL,
+    Answer TEXT NOT NULL,
+    Category VARCHAR(100), -- e.g., "Buying", "Selling", "Renting"
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+"Buying", "Selling", "Renting", loan , others 
+
+SellingAssistance  
+
+Here's the updated SQL table that includes an image column for storing an image related to each FAQ:
+
+sql
+Copy
+Edit
+CREATE TABLE FAQs (
+    FAQID INT PRIMARY KEY AUTO_INCREMENT,
+    Question TEXT NOT NULL,
+    Answer TEXT NOT NULL,
+    Category VARCHAR(100), -- e.g., "Buying", "Selling", "Renting"
+    ImageURL VARCHAR(255), -- URL to store related images
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+const teamMembers = [
+  { id: 1, name: "John Doe", role: "CEO & Founder", image: "/agent1.jpg" },
+  { id: 2, name: "Sarah Smith", role: "Senior Realtor", image: "/agent2.jpg" },
+  { id: 3, name: "Mike Johnson", role: "Property Consultant", image: "/agent3.jpg" },
+];

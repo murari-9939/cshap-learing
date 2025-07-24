@@ -1,0 +1,22 @@
+{/*    
+   <Router>
+      <AppNavbar />
+      
+      <PublicRoutes/>
+        <Routes>
+          {/* Login Route */}
+          {/* <Route path="/login" element={<Login setRole={setRole} />} />
+          <Route path="/Loginage" element={<Loginpage setRole={setRole} />} />
+          {/* Protected Routes */}
+          {/* <Route path="/*" element={<ProtectedRoutes role={role} />} />
+          
+          {/* Catch-All Route */}
+          {/* <Route path="*" element={<Navigate to="/login" />} />
+        </Routes> */} */}
+     
+    {/* </Router>
+    <MainLayout/> */} */}
+          {/* Always show AppNavbar, but you can conditionally style or hide specific elements */}
+        
+          {/* <Router> */} */}
+      {/* Main layout wrapping the whole application */}

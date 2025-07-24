@@ -1,0 +1,904 @@
+...............basic code function in agualr
+ngOnInit(): void {
+  // this.adddata();
+  
+this.userinput(3,4)
+
+
+
+
+}
+
+
+
+userinput(num1:number, num2:number):void{
+
+const result=num1+num2;
+console.log(result);
+
+}
+...............return type
+
+
+
+userinput(num1:number, num2:number):number{
+
+const result=num1+num2;
+console.log(result);
+return result;
+
+}
+
+}
+
+
+
+define opeject to tak input
+
+// contact = {
+  //   addressLine1: '',
+  //   addressLine2: '',
+  //   country: '',
+  //   city: '',
+  //   postalCode: '',
+  //   landmark: ''
+  // };
+
+
+
+It seems you’re trying to create an Angular component that collects user details (username and age) and then performs some action, like adding these details to datastore. Here’s how you could set it up to make it functional.
+
+Updated Code
+Implement a method (useradd) to add user data to the datastore array.
+Use the useradd() function to add the user details to datastore.
+Add a button to trigger the useradd method when clicked.
+Here's the code with the necessary changes:
+
+typescript
+Copy code
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-user',
+  template: `
+    <input [(ngModel)]="userdeatil.username" placeholder="Please enter your name" />
+    <input [(ngModel)]="userdeatil.age" placeholder="Please enter age" type="number" />
+    <button (click)="useradd()">Add User</button>
+
+    <ul>
+      <li *ngFor="let data of datastore">
+        Name: {{ data.username }}, Age: {{ data.age }}
+      </li>
+    </ul>
+  `,
+})
+export class UserComponent implements OnInit {
+  userdeatil = {
+    username: '',
+    age: ''
+  };
+
+  datastore: any[] = [];
+
+  ngOnInit(): void {
+    // Example call, but this would be customized per your requirement
+    this.userinput(3, 4);
+  }
+
+  // Function to add user details to datastore
+  useradd(): void {
+    // Add a copy of the user details to the datastore
+    this.datastore.push({ ...this.userdeatil });
+
+    // Clear the input fields after adding
+    this.userdeatil.username = '';
+    this.userdeatil.age = '';
+  }
+
+  // Placeholder for the userinput method you mentioned
+  userinput(param1: number, param2: number): void {
+    // Your custom logic
+  }
+}
+Explanation
+Two-Way Binding: The [(ngModel)] syntax binds userdeatil.username and userdeatil.age to the input fields.
+useradd Method: This method copies the userdeatil object to the datastore array and then clears the input fields.
+Button: When the button is clicked, useradd is called to add the user data to datastore.
+Display List: The *ngFor directive displays each entry in datastore, showing the username and age for each user added.
+This setup will let you enter user details, click "Add User," and display the added users in the list below.
+
+
+
+
+
+
+You said:
+how can we do it woihtout using array
+ChatGPT said:
+ChatGPT
+If you want to store user details without using an array, you could create a single object that keeps track of the most recent user data added. Instead of storing multiple users in an array, you'll overwrite the existing data each time a new user is added.
+
+Here’s how it could look:
+
+Code Example
+typescript
+Copy code
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-user',
+  template: `
+    <input [(ngModel)]="userdeatil.username" placeholder="Please enter your name" />
+    <input [(ngModel)]="userdeatil.age" placeholder="Please enter age" type="number" />
+    <button (click)="useradd()">Add User</button>
+
+    <div *ngIf="latestUser.username && latestUser.age">
+      <h3>Latest User</h3>
+      <p>Name: {{ latestUser.username }}</p>
+      <p>Age: {{ latestUser.age }}</p>
+    </div>
+  `,
+})
+export class UserComponent implements OnInit {
+  userdeatil = {
+    username: '',
+    age: ''
+  };
+
+  latestUser = {
+    username: '',
+    age: ''
+  };
+
+  ngOnInit(): void {
+    // Placeholder for initial method calls
+    this.userinput(3, 4);
+  }
+
+  // Function to set the latest user details
+  useradd(): void {
+    // Copy current user details to latestUser
+    this.latestUser = { ...this.userdeatil };
+
+    // Clear the input fields after adding
+    this.userdeatil.username = '';
+    this.userdeatil.age = '';
+  }
+
+  // Placeholder for the userinput method you mentioned
+  userinput(param1: number, param2: number): void {
+    // Your custom logic
+  }
+}
+Explanation
+latestUser Object: Instead of an array, latestUser is used to hold the data of the most recent user added.
+useradd Method: Copies userdeatil values to latestUser, effectively storing the last entered user data.
+Display Logic: A *ngIf directive is used to display latestUser only if it has valid values for username and age.
+Each time you click "Add User," the latestUser data is updated with the most recent input, and any previous data is overwritten. This approach only displays the latest user's details instead of maintaining a history.
+
+
+
+
+
+
+You said:
+{ ...this.userdeatil }; why we use three ciolon heres
+ChatGPT said:
+ChatGPT
+The syntax { ...this.userdeatil } in JavaScript and TypeScript is known as the spread operator. It’s used here to create a shallow copy of the userdeatil object. Let’s break down why this is useful in this context.
+
+Why Use { ...this.userdeatil }?
+In JavaScript, objects are reference types, meaning if you assign one object to another variable, they both point to the same memory location. Without { ...this.userdeatil }, assigning this.userdeatil to this.latestUser would make both variables refer to the same object in memory. Changes in userdeatil would then also affect latestUser and vice versa.
+
+By using { ...this.userdeatil }, you’re creating a new object with the same properties and values as userdeatil, but it’s independent of the original. This way:
+
+Copy is created: latestUser gets its own copy of userdeatil's data at that moment.
+Changes won’t interfere: Further changes to userdeatil won't affect latestUser and vice versa.
+Example
+Here’s a simple example to illustrate:
+
+typescript
+Copy code
+let userdeatil = { username: 'Alice', age: 25 };
+let latestUser = { ...userdeatil }; // Creates a copy of userdeatil
+
+// Now changing userdeatil
+userdeatil.username = 'Bob';
+
+console.log(latestUser.username); // Outputs: 'Alice'
+console.log(userdeatil.username); // Outputs: 'Bob'
+If you didn’t use { ...userdeatil }, changing userdeatil.username would also change latestUser.username. The spread operator prevents that by creating a separate copy.
+
+
+
+
+
+
+You said:
+can we do it wihout spread operator
+ChatGPT said:
+ChatGPT
+Yes, you can make a copy of an object without using the spread operator by using other methods. Here are a few alternatives to create a shallow copy of an object in JavaScript/TypeScript:
+
+1. Using Object.assign
+The Object.assign method can create a shallow copy of an object by copying all properties from userdeatil to an empty object {}.
+
+typescript
+Copy code
+let userdeatil = { username: 'Alice', age: 25 };
+let latestUser = Object.assign({}, userdeatil);
+
+// Modifying userdeatil won't affect latestUser
+userdeatil.username = 'Bob';
+
+console.log(latestUser.username); // Outputs: 'Alice'
+console.log(userdeatil.username); // Outputs: 'Bob'
+2. Using JSON Methods
+If userdeatil is a simple object (only containing serializable properties), you can use JSON.stringify and JSON.parse to create a deep copy. This is also useful for nested objects, but keep in mind that it won’t work if the object contains non-serializable values like functions, undefined, or Date objects.
+
+typescript
+Copy code
+let userdeatil = { username: 'Alice', age: 25 };
+let latestUser = JSON.parse(JSON.stringify(userdeatil));
+
+// Modifying userdeatil won't affect latestUser
+userdeatil.username = 'Bob';
+
+console.log(latestUser.username); // Outputs: 'Alice'
+console.log(userdeatil.username); // Outputs: 'Bob'
+3. Manual Copying
+If the object structure is simple, you can manually copy each property. This approach is more limited and less flexible, especially if new properties are added to the object in the future.
+
+typescript
+Copy code
+let userdeatil = { username: 'Alice', age: 25 };
+let latestUser = { username: userdeatil.username, age: userdeatil.age };
+
+// Modifying userdeatil won't affect latestUser
+userdeatil.username = 'Bob';
+
+console.log(latestUser.username); // Outputs: 'Alice'
+console.log(userdeatil.username); // Outputs: 'Bob'
+Summary
+
+
+
+
+
+You said:
+in angualr
+ChatGPT said:
+ChatGPT
+In Angular, you can use the same approaches to copy an object without using the spread operator. Here’s how to apply them effectively:
+
+1. Using Object.assign in Angular
+Object.assign is straightforward and commonly used in Angular to make a shallow copy of an object:
+
+typescript
+Copy code
+useradd(): void {
+  // Create a shallow copy of userdeatil
+  this.latestUser = Object.assign({}, this.userdeatil);
+
+  // Clear input fields
+  this.userdeatil.username = '';
+  this.userdeatil.age = '';
+}
+2. Using JSON Serialization in Angular
+If userdeatil is a simple object (no functions or non-serializable properties), you can use JSON.stringify and JSON.parse to create a deep copy:
+
+typescript
+Copy code
+useradd(): void {
+  // Create a deep copy using JSON methods
+  this.latestUser = JSON.parse(JSON.stringify(this.userdeatil));
+
+  // Clear input fields
+  this.userdeatil.username = '';
+  this.userdeatil.age = '';
+}
+3. Manual Copying in Angular
+If userdeatil has only a few properties, you can manually assign each property. This approach is simple but less scalable:
+
+typescript
+Copy code
+useradd(): void {
+  // Manually copy each property
+  this.latestUser = {
+    username: this.userdeatil.username,
+    age: this.userdeatil.age
+  };
+
+  // Clear input fields
+  this.userdeatil.username = '';
+  this.userdeatil.age = '';
+}
+Which to Use?
+Use Object.assign if you want a shallow copy.
+Use JSON.parse(JSON.stringify(...)) if you need a deep copy and the object is serializable.
+Manual copying is fine for simple objects with a few properties but becomes impractical for larger or more complex objects.
+These approaches can be used directly in any Angular component or service without modifying your Angular setup.
+....................................
+It looks like you want to add a copy of userdeatil to datastore but convert it to a JSON string before adding it. You can do this by using JSON.stringify to convert the object to a JSON string, and JSON.parse to convert it back to an object if needed later.
+
+Here’s how you can modify your useradd function:
+
+typescript
+Copy code
+// Function to add user details to datastore
+useradd(): void {
+  // Convert userdeatil to JSON string and add it to datastore
+  const userJson = JSON.stringify(this.userdeatil);
+  this.datastore.push(userJson);
+
+  // Clear the input fields after adding
+  this.userdeatil.username = '';
+  this.userdeatil.age = '';
+}
+Explanation
+JSON.stringify(this.userdeatil): This converts the userdeatil object to a JSON string.
+Push JSON string to datastore: You add the JSON string to the datastore array.
+Clearing Inputs: After adding the data, the input fields are cleared.
+Accessing Stored Data
+If you later need to access the data as an object, you can convert it back using JSON.parse:
+
+typescript
+Copy code
+const userObject = JSON.parse(this.datastore[index]);
+This approach stores each entry as a JSON string, and JSON.parse will convert it back to an object for manipulation if needed.
+
+
+
+
+
+
+You said:
+
+// Function to add user details to datastore
+useradd(): void {
+  // Convert userdeatil to JSON string and add it to datastore
+  const userJson = JSON.stringify(this.userdeatil);
+  this.datastore.push(userJson);
+
+
+  
+
+  // Clear the input fields after adding
+  this.userdeatil.username = '';
+  this.userdeatil.age = '';
+} use console
+ChatGPT said:
+ChatGPT
+To see the results of useradd() in the console, you can add console.log statements at different points in your function. This will help you confirm that userdeatil is being converted to JSON and stored in datastore as expected.
+
+Here’s how you can modify the function:
+
+typescript
+Copy code
+// Function to add user details to datastore
+useradd(): void {
+  // Convert userdeatil to JSON string and add it to datastore
+  const userJson = JSON.stringify(this.userdeatil);
+  this.datastore.push(userJson);
+
+  // Log the JSON string
+  console.log("User JSON added to datastore:", userJson);
+
+  // Log the entire datastore to see all entries
+  console.log("Current datastore:", this.datastore);
+
+  // Clear the input fields after adding
+  this.userdeatil.username = '';
+  this.userdeatil.age = '';
+
+  // Confirm that fields are cleared
+  console.log("Cleared user details:", this.userdeatil);
+}
+Explanation of Console Logs
+console.log("User JSON added to datastore:", userJson); logs the JSON string of userdeatil that was added.
+console.log("Current datastore:", this.datastore); logs the entire datastore array so you can see all stored entries.
+console.log("Cleared user details:", this.userdeatil); confirms that userdeatil fields are reset to empty values.
+
+
+
+.................................
+// Define the structure of the user
+userdeatil = {
+  username: '',
+  age: ''
+};
+
+// Define arrays to store user data
+datastore: string[] = [];  // Array to store user data as JSON strings
+parsedDatastore: any[] = [];  // Array to store parsed user objects
+
+useradd(): void {
+  // Convert userdeatil to JSON string and add it to datastore
+  const userJson = JSON.stringify(this.userdeatil);
+  this.datastore.push(userJson);
+
+  // Parse the JSON string and add the parsed object to parsedDatastore
+  this.parsedDatastore.push(this.userdeatil);
+
+  // Log the JSON string
+  console.log("User JSON added to datastore:", userJson);
+
+  // Log the entire datastore to see all entries
+  console.log("Current datastore:", this.datastore);
+
+  // Clear the input fields after adding
+  this.userdeatil.username = '';
+  this.userdeatil.age = '';
+}
+...............................
+
+userdeatil:any ={
+
+  num1:'',
+  num2:''
+};
+
+
+useradd():void{
+
+
+ // Ensure both inputs are numbers
+//  const num1 = parseFloat(usernum.num1);
+//  const num2 = parseFloat(usernum.num2);
+  // Ensure num1 and num2 are treated as numbers
+  const result = Number(this.userdeatil.num1) + Number(this.userdeatil.num2);
+  console.log(result);
+}
+....................classs in agualr............
+.........genrating class command ng generate class models/User
+..................
+how to genrate module
+
+ChatGPT said:
+ChatGPT
+To generate a module in an Angular application, you can use the Angular CLI command ng generate module or shorthand ng g m. Here’s how to do it:
+
+Basic Module Generation:
+
+bash
+Copy code
+ng generate module module-name
+Replace module-name with the name of the module you want to create. This command will generate a new module file, module-name.module.ts, inside a folder named module-name.
+
+Generating a Module with Routing:
+
+If you want Angular to set up routing in the new module (a module-name-routing.module.ts file), you can add the --routing flag:
+
+bash
+Copy code
+ng generate module module-name --routing
+
+.......................seveices 
+
+how to crreate seveices
+
+ChatGPT said:
+ChatGPT
+To create services in Angular, you can use the Angular CLI command ng generate service (or shorthand ng g s). Here’s a step-by-step guide:
+
+Basic Service Generation:
+
+Run the following command to create a new service:
+
+bash
+Copy code
+ng generate service service-name
+Replace service-name with the name you want for your service. This command will create two files: service-name.service.ts and service-name.service.spec.ts (for testing) in a new folder named service-name.
+
+Specify a Directory:
+
+To create the service inside a specific directory, include the path before the service name:
+
+bash
+Copy code
+ng generate service folder/service-name
+This will create service-name.service.ts inside the folder directory.
+
+Injectable Configuration:
+
+By default, Angular CLI creates services with @Injectable({ providedIn: 'root' }). This configuration provides the service at the root level, making it a singleton across the application.
+
+typescript
+Copy code
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ServiceNameService {
+  constructor() { }
+}
+If you only want this service to be available in a specific module, you can add it to the providers array in that module instead:
+
+.............class exaplme
+
+
+Response 1
+In Angular, creating a class is straightforward and can be done manually or using Angular CLI commands. A class is typically used to define data models or utility structures that represent entities in your application, like User, Product, etc.
+
+Method 1: Creating a Class Manually
+Create a new file in the desired folder (often models) for the class, for example, user.model.ts.
+Define the class in this file with the properties and methods needed.
+Here’s a simple example of a User model class:
+
+// src/app/models/user.model.ts
+
+export class User {
+    id: number;
+    name: string;
+    email: string;
+
+    constructor(id: number, name: string, email: string) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+}
+Method 2: Using Angular CLI to Generate a Class
+Angular CLI provides a command to automatically create a class. To use it, follow these steps:
+
+Open the terminal in your Angular project directory.
+
+Run the following command to create a class:
+
+ng generate class models/user
+This command will generate a file named user.ts in the src/app/models folder.
+It will also create a basic class structure for User.
+Open the generated file and add properties or methods as needed:
+
+// src/app/models/user.ts
+
+export class User {
+    id: number;
+    name: string;
+    email: string;
+
+    constructor(id: number, name: string, email: string) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+}
+Using the Class in a Component or Service
+After creating the class, you can import it into any Angular component or service to use it.
+
+Example Usage in a Component
+// src/app/components/user.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { User } from '../models/user.model';
+
+@Component({
+  selector: 'app-user',
+  template: `
+    <h2>User Details</h2>
+    <p>Name: {{ user.name }}</p>
+    <p>Email: {{ user.email }}</p>
+  `,
+})
+export class UserComponent implements OnInit {
+  user: User;
+
+  ngOnInit() {
+    // Instantiate a new User object
+    this.user = new User(1, 'Alice', 'alice@example.com');
+  }
+}
+Summary
+Define the Class: Either manually or using Angular CLI.
+Add Properties and Methods: As per your application's data model.
+Import and Use: In any Angular component or service, to organize and structure your data consistently across your app.
+Using classes in this way helps improve type safety, code readability, and maintainability in your Angular application.
+
+
+I prefer this response
+ChatGPT
+Response 2
+Creating a class in Angular is straightforward, and it’s usually done for data models or utility classes. Here’s a step-by-step guide on creating a class in Angular.
+
+Step 1: Generate the Class
+You can create a class manually or use Angular CLI to generate it.
+
+1.1 Using Angular CLI
+To quickly create a class file using Angular CLI, open your terminal and navigate to your Angular project, then run:
+
+ng generate class models/User
+This command creates a User class in a new models folder inside src/app. You’ll see a file created at src/app/models/user.ts.
+
+1.2 Manually Creating the Class File
+Alternatively, you can manually create a file for the class in the src/app/models directory:
+
+Go to src/app/models.
+Create a new file named user.model.ts.
+Step 2: Define the Class
+Open user.model.ts and define your class structure. Here’s an example for a User class.
+
+// src/app/models/user.model.ts
+
+export class User {
+    id: number;
+    name: string;
+    email: string;
+    phoneNumber: string;
+
+    constructor(id: number, name: string, email: string, phoneNumber: string) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
+
+    getFullContactInfo(): string {
+        return `${this.name} - Email: ${this.email}, Phone: ${this.phoneNumber}`;
+    }
+}
+Explanation
+Properties: Define the properties of the class (id, name, email, phoneNumber) to store user data.
+Constructor: The constructor initializes the properties of the class when a new instance is created.
+Method: getFullContactInfo() is an example method that returns formatted contact information.
+Step 3: Using the Class in Angular Components or Services
+You can now import and use this class in any component, service, or other parts of your Angular application.
+
+Example Usage in a Component
+Here’s an example of how to use this User class in a component.
+
+// src/app/components/user.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { User } from '../models/user.model';
+
+@Component({
+  selector: 'app-user',
+  template: `
+    <h2>User Details</h2>
+    <p>{{ user.getFullContactInfo() }}</p>
+  `,
+})
+export class UserComponent implements OnInit {
+  user: User;
+
+  ngOnInit() {
+    // Initialize the user with sample data
+    this.user = new User(1, 'John Doe', 'john.doe@example.com', '123-456-7890');
+  }
+}
+......................inteface
+
+how do we create inteface in abnhgalr
+ChatGPT said:
+ChatGPT
+In Angular, creating an interface is straightforward. Interfaces are used to define a structure for objects, making code more predictable and easier to maintain.
+
+Here’s how to create and use an interface in Angular:
+
+Create an Interface: Define the structure in a .ts file.
+Implement the Interface: Use it in your components or services.
+Step-by-Step Guide
+Step 1: Define an Interface
+Create a file named user.interface.ts in your Angular project, typically in the models folder.
+
+typescript
+Copy code
+// src/app/models/user.interface.ts
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  role?: string;  // optional property
+}
+In this example:
+
+id, name, and email are required fields.
+role is an optional field (indicated by the ?).
+Step 2: Use the Interface in a Component or Service
+You can now use this User interface in any Angular component or service to type-check your objects.
+
+typescript
+Copy code
+import { Component, OnInit } from '@angular/core';
+import { User } from './models/user.interface';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent implements OnInit {
+  user: User;
+
+  ngOnInit(): void {
+    // Initialize user with interface type
+    this.user = {
+      id: 1,
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+      role: 'User'
+    };
+    
+    console.log(this.user);
+  }
+}
+Benefits of Using Interfaces in Angular
+Type Safety: Helps catch errors during development by enforcing a specific structure.
+Readability: Makes it clear what properties an object is expected to have.
+IntelliSense: Provides code completion in editors like Visual Studio Code.
+This approach keeps your code clean, type-safe, and easy to maintain.
+
+
+
+
+
+
+You said:
+cli to create interface
+ChatGPT said:
+ChatGPT
+To create an interface in Angular using the Angular CLI, you can use the following command:
+
+bash
+Copy code
+ng generate interface <name>
+Example
+If you want to create a User interface, you would run:
+
+bash
+Copy code
+ng generate interface user
+This command will:
+
+Create a file named user.ts in the src/app directory by default.
+Define an empty interface structure with the name User.
+Specifying a Directory
+To generate the interface in a specific folder (e.g., models), you can specify the path:
+
+bash
+Copy code
+ng generate interface models/user
+This will create the file at src/app/models/user.ts.
+
+Result
+The generated file will look like this:
+
+typescript
+Copy code
+export interface User {
+}
+You can then modify the interface to add properties:
+
+typescript
+Copy code
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  role?: string;  // optional property
+}
+This CLI command is a quick way to set up interfaces with consistent naming and structure.
+
+
+.......................project making
+
+firest create module .commmnad to genrate module ng g m 
+then create comnomnet ..cli ng g c with also inside module u can menstion
+...........
+To create an HTTP interceptor in Angular, you can use the Angular CLI command to quickly generate the interceptor file. Here’s a step-by-step guide:
+
+Step 1: Generate the Interceptor
+Run the following command in your terminal:
+
+bash
+Copy code
+ng generate interceptor <name>
+For example, if you want to name your interceptor auth, you would run:
+
+bash
+Copy code
+ng generate interceptor auth
+This will create two files, auth.interceptor.ts and auth.interceptor.spec.ts, in the src/app directory by default.
+
+
+.................
+
+export class User {
+
+id:number | undefined;
+name:string | undefined;
+
+
+
+constructor(id: number = 0, name: string = '') {
+    this.id = id;
+    this.name = name;
+  }
+getsuserinfo():string{
+
+
+return `${this.id} - name: ${this.name}`;
+
+
+}
+
+
+displayuser(id:number, name:string ):void{
+console.log("username"+ this.id)
+console.log("username"+ this.name)
+}
+
+.............
+
+
+
+classs ..................... exaples................
+
+
+export class User {
+
+id:number ;
+name:string ;
+
+constructor(id: number, name: string) {
+    this.id = id;
+    this.name = name;
+  }
+
+  getsuserinfo(): string {
+    return `ID: ${this.id} - Name: ${this.name}`;
+  }
+
+  displayuser(): void {
+    console.log("User ID: " + this.id);
+    console.log("User Name: " + this.name);
+  }
+
+
+
+}
+
+............usercomepmnthm...........
+
+<p>userc works!</p>
+
+
+  <div class="container">
+    <label for="userId">User ID:</label>
+    <input type="number" id="userId" [(ngModel)]="user.id" placeholder="Enter ID" />
+    
+    <label for="userName">User Name:</label>
+    <input type="text" id="userName" [(ngModel)]="user.name" placeholder="Enter Name" />
+  
+    <button (click)="showUserInfo()">Show User Info</button>
+  </div>
+  .................
+user copmnt s ........
+
+
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { User } from '../models/user';
+
+@Component({
+  selector: 'app-userc',
+  standalone: true,
+  imports:  [FormsModule],
+  templateUrl: './userc.component.html',
+  styleUrl: './userc.component.css'
+})
+export class UsercComponent implements OnInit{
+
+// Initialize user as a class property
+  user!: User
+  ngOnInit(): void {
+    // Initialize user with default values
+    this.user = new User(1, 'John Doe'); // Set default values for testing
+  }
+
+  showUserInfo(): void {
+    console.log(this.user.getsuserinfo());
+  }
+
+}
